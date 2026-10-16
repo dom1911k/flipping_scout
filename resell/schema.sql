@@ -65,3 +65,10 @@ CREATE TABLE IF NOT EXISTS parse_issues (
     raw     TEXT,
     reason  TEXT
 );
+
+-- Storefront code -> shop name, learned from the workbook on each import.
+CREATE TABLE IF NOT EXISTS storefronts (
+    key     TEXT PRIMARY KEY,     -- e.g. "storefront 5849" or "user 1671524107"
+    seller  TEXT NOT NULL,
+    rows    INTEGER
+);

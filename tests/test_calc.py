@@ -97,3 +97,5 @@ def test_web_endpoints():
     assert r.status_code == 200 and "Pay at most" in r.text
     r = client.post("/go", data={"mode": "calc", "category": "N3DS", "rmb": "1500", "sell": "320"})
     assert r.status_code == 200 and "<html" in r.text and "Landed cost" in r.text
+    for page in ("/messages?category=iPod", "/inspect?category=Vita%20card", "/sellers"):
+        assert client.get(page).status_code == 200

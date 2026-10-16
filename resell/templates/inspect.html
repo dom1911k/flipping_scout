@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Arrival Check{% endblock %}
+{% block content %}
+<h1>Arrival check</h1>
+<div class="sub">First 10 minutes with a new unit. Saved locally; feeds the seller scorecard. Checks live in
+  <code>resell/content/checklists.yaml</code>.</div>
+{% if saved %}<div class="ok-msg">Saved inspection #{{ saved.id }}: {{ saved.state }}.</div>{% endif %}
+{% for w in warnings %}<div class="warn-msg">⚠ {{ w }}</div>{% endfor %}
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<div class="grid">
+  <form method="post" action="/inspect" id="inspect-form">
+    <div class="field"><label for="category">Category</label>
+      <select id="category" name="category" onchange="location='/inspect?category='+encodeURIComponent(this.value)">
+        {% for c in categories %}<option {% if c == category %}selected{% endif %}>{{ c }}</option>{% endfor %}
+      </select></div>
+    <div class="field"><label for="item">Item (as in your sheet)</label>
+      <input id="item" name="item" placeholder="N3DSLL dual IPS white 98" value="{{ form.item or '' }}"></div>
+    <div class="field"><label for="listing">Listing link</label>
+      <input id="listing" name="listing" placeholder="goofish.com/item?... (seller is looked up)" value="{{ form.listing or '' }}"></div>
+    <div class="field"><label for="seller">Seller (optional if the link is known)</label>
+      <input id="seller" name="seller" list="sellers" value="{{ form.seller or '' }}">
+      <datalist id="sellers">{% for s in seller_names %}<option value="{{ s }}">{% endfor %}</datalist></div>
+    <div class="row">
+      <div class="field"><label for="buy_date">Bought</label>
+        <input id="buy_date" name="buy_date" type="date" value="{{ form.buy_date or '' }}"></div>
+      <div class="field"><label for="price_paid">Paid € (landed)</label>
+        <input id="price_paid" name="price_paid" inputmode="decimal" value="{{ form.price_paid or '' }}"></div>
+    </div>
+    <div class="field"><label for="serial">Serial</label>
+      <input id="serial" name="serial" value="{{ form.serial or '' }}" hx-post="/inspect/serial" hx-trigger="input changed delay:400ms" hx-target="#serial-warn" hx-include="this"></div>
+    <div id="serial-warn"></div>
+    <div class="field"><label for="precheck">Did the seller answer your checklist?</label>
+      <select id="precheck" name="precheck">
+        {% for k, l in precheck.items() %}<option value="{{ k }}" {% if form.precheck == k %}selected{% endif %}>{{ l }}</option>{% endfor %}
+      </select></div>
+    <div class="field"><label for="comment">Comment</label>
+      <input id="comment" name="comment" value="{{ form.comment or '' }}"></div>
+    <button type="submit">Save inspection</button>
+    <p class="hint">Everything defaults to OK; only touch what's wrong.</p>
+  </form>
+  <div class="card">
+    <table class="checks">
+      {% for c in checks %}
+      <tr><td>
+        <b>{{ c.label }}</b><div class="hint">{{ c.how }}</div>
+        <input class="note" form="inspect-form" name="note_{{ c.key }}" placeholder="note (if not OK)">
+      </td><td style="white-space:nowrap">
+        <span class="seg">
+          <label><input type="radio" form="inspect-form" name="r_{{ c.key }}" value="ok" checked>OK</label>
+          {% if c.minor_ok %}<label class="minor"><input type="radio" form="inspect-form" name="r_{{ c.key }}" value="minor">Minor</label>{% endif %}
+          <label class="flaw"><input type="radio" form="inspect-form" name="r_{{ c.key }}" value="flaw">Flaw</label>
+          <label><input type="radio" form="inspect-form" name="r_{{ c.key }}" value="na">n/a</label>
+        </span>
+      </td></tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+<h2 style="font-size:16px;margin:28px 0 8px">Recent inspections</h2>
+<div class="card wide">
+  {% if recent %}
+  <table class="data">
+    <tr><th>#</th><th>Date</th><th>Category</th><th>Item</th><th>Seller</th><th>Serial</th><th>Result</th><th>Checklist</th><th></th></tr>
+    {% for r in recent %}
+    <tr><td>{{ r.id }}</td><td>{{ r.created[:10] }}</td><td>{{ r.category }}</td><td>{{ r.item or '' }}</td>
+      <td>{{ r.seller or '' }}</td><td>{{ r.serial or '' }}</td>
+      <td>{% if not r.flawed %}<span class="verdict PASS">clean</span>{% elif r.flaw_minor %}<span class="verdict BORDERLINE">minor</span>{% else %}<span class="verdict FAIL">flaw</span>{% endif %}
+        <span class="hint">{{ r.flaw_tags or '' }}</span></td>
+      <td>{{ r.precheck or '' }}</td>
+      <td><form method="post" action="/inspect/{{ r.id }}/delete" onsubmit="return confirm('Delete inspection #{{ r.id }}?')" style="padding:0;border:0;background:none">
+        <button class="copy" style="background:var(--line);color:var(--ink)">Delete</button></form></td></tr>
+    {% endfor %}
+  </table>
+  {% else %}<p class="hint">No inspections yet.</p>{% endif %}
+</div>
+{% endblock %}

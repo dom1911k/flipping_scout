@@ -1,0 +1,50 @@
+# Arrival inspection: what to check in the first ~10 minutes, per category.
+# Each check: key, label, how (short), flaw (the Phase 0 flaw group a failed check counts as).
+# minor_ok: true = you may mark it "minor" (sell at near-normal price) instead of a full flaw.
+
+checklists:
+  N3DS:
+    - {key: serial, label: Serial label, how: "Photo it; compare the printed serial with the system/sticker; check the blacklist", flaw: shell_serial}
+    - {key: shell, label: Shell original and intact, how: "Screws untouched, no cracks/gaps, back closes flush, no rough or yellowed plastic", flaw: shell_serial, minor_ok: true}
+    - {key: top_white, label: Top screen on white, how: "Max brightness, white image: yellow edges/corners, tint, dim areas", flaw: yellow, minor_ok: true}
+    - {key: top_dust, label: Top screen at an angle, how: "Screen off, angled light: dust, hair, spiderweb under the glass", flaw: dust_debris}
+    - {key: bottom_screen, label: Bottom screen, how: "White image + angled light: dust, scratches, touch works in corners", flaw: dust_debris, minor_ok: true}
+    - {key: pixels, label: Dead/bright pixels, how: "Black and white images on both screens", flaw: screen}
+    - {key: three_d, label: 3D slider and effect, how: "3D image or camera in 3D mode", flaw: function}
+    - {key: cameras, label: Cameras, how: "Inner and both outer cameras", flaw: function}
+    - {key: buttons, label: All buttons, how: "ABXY, D-pad, L/R, ZL/ZR, Start/Select/Home, power, volume", flaw: function}
+    - {key: sticks, label: Circle pad and C-stick, how: "System settings > controls test: no drift, full range", flaw: function}
+    - {key: wifi, label: WiFi, how: "Connect to your network; signal strength normal", flaw: function}
+    - {key: charge, label: Charging and battery, how: "Charges, LED normal, doesn't drop fast on a short run", flaw: function}
+    - {key: sound, label: Speakers and headphone jack, how: "Both speakers, both headphone channels", flaw: function}
+    - {key: sd, label: SD card, how: "Card reads, capacity as listed", flaw: function, minor_ok: true}
+    - {key: smell, label: Smell, how: "Any smoke or other smell", flaw: odor}
+    - {key: region, label: Region as listed, how: "JP/US/EU system matches the listing", flaw: wrong_item}
+
+  iPod:
+    - {key: capacity, label: Capacity as listed, how: "Settings > About shows the advertised size", flaw: wrong_item}
+    - {key: fill_test, label: Storage write test, how: "Sync a large batch (or fill most of it); no errors, no freezes", flaw: function}
+    - {key: battery, label: Battery, how: "Charges, percentage/hours plausible for the listed mAh", flaw: function}
+    - {key: audio, label: Both channels, how: "Headphones: left and right, no crackle or dropouts", flaw: function}
+    - {key: wheel, label: Click wheel and centre, how: "Up/down/left/right, centre, scroll is smooth", flaw: function}
+    - {key: hold, label: Hold switch, how: "Locks and unlocks", flaw: function}
+    - {key: screen, label: Screen, how: "White background: dead pixels, dust, scratches", flaw: screen, minor_ok: true}
+    - {key: shell, label: Front/back shell, how: "Scratches, dents, back cover fits", flaw: scratch, minor_ok: true}
+    - {key: smell, label: Smell, how: "Any smoke or other smell", flaw: odor}
+
+  Vita card:
+    - {key: genuine, label: Genuine Sony card, how: "Label, weight, shape; not a re-label", flaw: wrong_item}
+    - {key: capacity, label: Capacity on console, how: "Vita shows the advertised total size", flaw: wrong_item}
+    - {key: format, label: Formats and works on your account, how: "Format, copy something, read it back", flaw: function}
+    - {key: contacts, label: Contacts and casing, how: "No wear or damage", flaw: scratch, minor_ok: true}
+
+  generic:
+    - {key: powers_on, label: Powers on, how: "Boots normally", flaw: function}
+    - {key: functions, label: Main functions, how: "Everything the listing promised works", flaw: function}
+    - {key: cosmetic, label: Cosmetic condition as listed, how: "Compare with the listing photos", flaw: scratch, minor_ok: true}
+    - {key: smell, label: Smell, how: "Any smoke or other smell", flaw: odor}
+    - {key: as_listed, label: Item matches the listing, how: "Model, version, accessories", flaw: wrong_item}
+
+# Serials seen on more than one reshelled unit. Spaces are ignored when comparing.
+known_fake_serials:
+  - QW13030465 8

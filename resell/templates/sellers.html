@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Seller Scorecard{% endblock %}
+{% block content %}
+<h1>Seller scorecard</h1>
+<div class="sub">From your Sales Sheet (sellers recognised by shop name or storefront code) plus your arrival checks.
+  An inspection overrides the comment-based flaw flag for the same unit.</div>
+<form method="get" action="/sellers" class="card" style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:14px">
+  <div class="field" style="margin:0"><label>Category</label>
+    <select name="category" onchange="this.form.submit()">
+      <option value="">All</option>
+      {% for c in categories %}<option {% if c == category %}selected{% endif %}>{{ c }}</option>{% endfor %}
+    </select></div>
+  <div class="field" style="margin:0"><label>Min. units</label>
+    <input name="min_units" value="{{ min_units }}" inputmode="numeric" style="width:80px" onchange="this.form.submit()"></div>
+</form>
+<div class="card wide">
+  <table class="data">
+    <tr><th>Seller</th><th>Bought</th><th>Sold</th><th>Flawed</th><th>Major</th><th>Avg profit</th><th>On cost</th>
+      <th>Last bought</th><th>Checklist</th><th>Storefront codes</th><th>Status / notes</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td class="name"><b>{{ r.seller }}</b><div class="hint">{{ r.categories }}</div></td>
+      <td>{{ r.bought }}</td><td>{{ r.sold }}</td>
+      <td>{{ pct(r.flaw_rate) }}</td><td>{{ pct(r.major_flaw_rate) }}</td>
+      <td>{{ eur(r.avg_profit) }}</td><td>{{ pct(r.profit_on_cost) }}</td>
+      <td>{{ r.last_bought }}</td>
+      <td>{% if r.checklist_asked %}{{ r.checklist_answered }}/{{ r.checklist_asked }}{% else %}–{% endif %}</td>
+      <td class="hint">{{ r.storefronts or '' }}</td>
+      <td>
+        <form method="post" action="/sellers/note" style="padding:0;border:0;background:none;display:flex;gap:4px;min-width:220px">
+          <input type="hidden" name="seller" value="{{ r.seller }}">
+          <input type="hidden" name="back" value="{{ query }}">
+          <select name="status" style="font:inherit;font-size:13px">
+            <option value="">–</option>
+            {% for s in statuses %}<option {% if r.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+          <input name="notes" value="{{ r.notes or '' }}" placeholder="notes" style="flex:1;font:inherit;font-size:13px;padding:3px 6px">
+          <button class="copy">Save</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% if not rows %}<p class="hint">No sellers yet - run <code>resell import</code>.</p>{% endif %}
+</div>
+{% endblock %}

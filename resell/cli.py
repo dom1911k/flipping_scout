@@ -28,20 +28,29 @@ def _load(cfg):
     return sales, purchases, pd.DataFrame(issues + p_issues, columns=["sheet", "cells", "raw", "reason"]), evidence
 
 
-@app.command("import")
-def import_cmd(config: Path = ConfigOpt):
-    """Read the workbook (read-only) and rebuild the local SQLite database."""
-    cfg = load_config(config)
-    sales, purchases, issues, _ = _load(cfg)
+def _store(cfg, sales, purchases, issues, evidence):
     con = db.connect(cfg.path(cfg.paths.db))
     with con:
         db.reset(con)
         db.write(con, "sales", sales)
         db.write(con, "purchases", purchases)
         db.write(con, "parse_issues", issues.astype(str))
+        sf = pd.DataFrame([{"key": k, "seller": v, "rows": sum(evidence["votes"].get(k, {}).values())}
+                           for k, v in evidence["learned"].items()], columns=["key", "seller", "rows"])
+        db.write(con, "storefronts", sf)
+    con.close()
+
+
+@app.command("import")
+def import_cmd(config: Path = ConfigOpt):
+    """Read the workbook (read-only) and rebuild the local SQLite database."""
+    cfg = load_config(config)
+    sales, purchases, issues, evidence = _load(cfg)
+    _store(cfg, sales, purchases, issues, evidence)
     typer.echo(f"sales: {len(sales)} rows ({int((sales.is_stock == 0).sum())} sold, {int(sales.is_stock.sum())} stock)")
     typer.echo(f"purchases: {len(purchases)} order lines, {int(purchases.sales_row.notna().sum())} matched to sales rows")
     typer.echo(f"parse issues logged: {len(issues)}  ->  {cfg.path(cfg.paths.db)}")
+    typer.echo("inspections and seller notes are kept (never touched by import)")
 
 
 @app.command()
@@ -51,18 +60,9 @@ def report(config: Path = ConfigOpt):
 
     cfg = load_config(config)
     sales, purchases, issues, evidence = _load(cfg)
-    con = db.connect(cfg.path(cfg.paths.db))
-    with con:
-        db.reset(con)
-        db.write(con, "sales", sales)
-        db.write(con, "purchases", purchases)
-        db.write(con, "parse_issues", issues.astype(str))
+    _store(cfg, sales, purchases, issues, evidence)
     path = build_report(sales, purchases, issues, evidence, cfg)
     typer.echo(f"report written to {path}")
-
-
-if __name__ == "__main__":
-    app()
 
 
 # ----------------------------------------------------------------------------- Phase 1
@@ -172,3 +172,108 @@ def serve(host: str = "127.0.0.1", port: int = 8765, config: Path = ConfigOpt):
     from .web import create_app
 
     uvicorn.run(create_app(config), host=host, port=port)
+
+
+# ----------------------------------------------------------------------------- Phase 2
+
+@app.command()
+def msg(
+    category: str = typer.Argument("N3DS", help="N3DS, iPod, Vita card, generic"),
+    snippet: str = typer.Option(None, "--snippet", "-s", help="video, serial_unclear, white_screen, discount, ..."),
+    zh_only: bool = typer.Option(False, "--zh", help="Only the Chinese text (for piping to the clipboard)"),
+):
+    """Pre-purchase message for a Xianyu seller (Chinese + German)."""
+    from . import inspection as I
+
+    if snippet:
+        snips = I.messages()["snippets"]
+        if snippet not in snips:
+            raise typer.BadParameter(f"unknown snippet - known: {', '.join(snips)}")
+        zh, de, title, why = snips[snippet]["zh"], snips[snippet]["de"], snippet, []
+    else:
+        key, t = I.template_for(category)
+        zh, de, title, why = t["zh"], t["de"], t["title"], t.get("why", [])
+    if zh_only:
+        typer.echo(zh.strip())
+        return
+    typer.echo(f"\n── {title} ── (send this)\n")
+    typer.echo(zh.strip())
+    typer.echo("\n── Deutsch ──\n")
+    typer.echo(de.strip())
+    for w in why:
+        typer.echo(f"  · {w}")
+    typer.echo("\nTip: `resell msg N3DS --zh | pbcopy` (macOS) or `| clip` (Windows) copies it.\n")
+
+
+@app.command()
+def inspect(
+    category: str = typer.Option(..., "--category", "-k"),
+    item: str = typer.Option(None, "--item", help="Name as in your sheet, e.g. 'N3DSLL dual IPS white 98'"),
+    seller: str = typer.Option(None, "--seller"),
+    listing: str = typer.Option(None, "--listing", help="Goofish link (seller is looked up from it)"),
+    buy_date: str = typer.Option(None, "--bought", help="YYYY-MM-DD"),
+    price: float = typer.Option(None, "--paid", help="Landed price paid, EUR"),
+    serial: str = typer.Option(None, "--serial"),
+    precheck: str = typer.Option(None, "--precheck", help="answered | partial | ignored | not_sent"),
+    config: Path = ConfigOpt,
+):
+    """Arrival inspection, check by check, saved to the local DB."""
+    from . import inspection as I
+
+    cfg = load_config(config)
+    if serial:
+        for w in I.serial_warnings(cfg, serial):
+            typer.secho(f"⚠ {w}", fg="red")
+    typer.echo(f"\n{category} arrival check - answer o(k) / m(inor) / f(law) / n(ot applicable)\n")
+    keys = {"o": "ok", "m": "minor", "f": "flaw", "n": "na", "": "ok"}
+    results, notes = {}, {}
+    for c in I.checklist_for(category):
+        while True:
+            a = typer.prompt(f"  {c['label']} - {c['how']} [o/m/f/n]", default="o", show_default=False).strip().lower()[:1]
+            if a in keys and (a != "m" or c.get("minor_ok")):
+                break
+            typer.echo("    (o, f or n" + (", m" if c.get("minor_ok") else "") + ")")
+        results[c["key"]] = keys[a]
+        if keys[a] in ("minor", "flaw"):
+            notes[c["key"]] = typer.prompt("    note", default="", show_default=False)
+    if precheck is None:
+        precheck = typer.prompt("Seller checklist (answered/partial/ignored/not_sent)", default="not_sent")
+    comment = typer.prompt("Comment (optional)", default="", show_default=False) or None
+    iid = I.save_inspection(cfg, category=category, results=results, item=item, seller=seller, listing=listing,
+                            buy_date=buy_date, price_paid=price, serial=serial, precheck=precheck,
+                            check_notes=notes, comment=comment)
+    flawed, minor, tags = I.evaluate(category, results, cfg)
+    state = "clean" if not flawed else ("minor flaw" if minor else "FLAWED")
+    typer.echo(f"\nSaved inspection #{iid}: {state}{' (' + tags + ')' if tags else ''}")
+
+
+@app.command()
+def sellers(category: str = typer.Option(None, "--category", "-k"), min_units: int = 2, config: Path = ConfigOpt):
+    """Seller scorecard from your sales history and inspections."""
+    from . import inspection as I
+
+    card = I.scorecard(load_config(config), category)
+    if card.empty:
+        typer.echo("no data - run `resell import` first")
+        return
+    card = card[card.bought >= min_units]
+    typer.echo(f"\n{'Seller':<28}{'Bought':>7}{'Flawed':>8}{'Major':>7}{'Profit':>8}{'On cost':>9}  {'Last':<11}{'Checklist':>10}  Status")
+    for r in card.itertuples():
+        chk = f"{r.checklist_answered}/{r.checklist_asked}" if r.checklist_asked else "-"
+        profit = f"€{r.avg_profit:.0f}" if pd.notna(r.avg_profit) else "-"
+        poc = f"{r.profit_on_cost:.0%}" if pd.notna(r.profit_on_cost) else "-"
+        last = r.last_bought.date().isoformat() if pd.notna(r.last_bought) else "-"
+        typer.echo(f"{str(r.seller)[:27]:<28}{r.bought:>7}{r.flaw_rate:>8.0%}{r.major_flaw_rate:>7.0%}{profit:>8}{poc:>9}  "
+                   f"{last:<11}{chk:>10}  {r.status if isinstance(r.status, str) else ''}"
+                   f"{' - ' + r.notes if isinstance(r.notes, str) else ''}")
+    typer.echo("")
+
+
+@app.command("seller-note")
+def seller_note(seller: str, status: str = typer.Option(None, help="preferred | ok | watch | avoid"),
+                note: str = typer.Option(None), config: Path = ConfigOpt):
+    """Set a seller's status and notes (kept across imports)."""
+    from . import inspection as I
+
+    I.set_seller_note(load_config(config), seller, status, note)
+    typer.echo(f"saved: {seller}")

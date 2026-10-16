@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Seller Messages{% endblock %}
+{% block content %}
+<h1>Seller messages</h1>
+<div class="sub">Ask for evidence before you buy. Send the Chinese; the German is so you know what it says.
+  Edit the texts in <code>resell/content/messages.yaml</code>.</div>
+<div class="grid">
+  <div class="card">
+    <div class="field"><label>Category</label>
+      <form method="get" action="/messages">
+        <select name="category" onchange="this.form.submit()">
+          {% for k, t in templates.items() %}<option value="{{ k }}" {% if k == key %}selected{% endif %}>{{ t.title }}</option>{% endfor %}
+        </select>
+      </form>
+    </div>
+    <p class="hint">After the seller answers, open <a href="/inspect">Arrival check</a> when the unit lands and record
+      whether they answered — that feeds the seller scorecard.</p>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <b>{{ t.title }}</b><button class="copy" data-copy="zh-main">Copy Chinese</button>
+    </div>
+    <div class="zh" id="zh-main">{{ t.zh.strip() }}</div>
+    <div class="de">{{ t.de.strip() }}</div>
+    {% if t.why %}<ul class="why">{% for w in t.why %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+    <h3 style="font-size:15px;margin:18px 0 6px">Follow-ups</h3>
+    <div class="snips">
+      {% for name, s in snippets.items() %}
+      <div class="snip">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span class="hint">{{ name.replace("_", " ") }}</span><button class="copy" data-copy="zh-{{ name }}">Copy</button>
+        </div>
+        <div class="zh" id="zh-{{ name }}">{{ s.zh }}</div>
+        <div class="de">{{ s.de }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

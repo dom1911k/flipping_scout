@@ -129,6 +129,49 @@ form still works as a normal page. It binds to 127.0.0.1 only.
 - Customs duty rates per tariff code aren't looked up. Set `duty_rate` per category if one applies.
 - Shipping is a flat €/kg estimate. Calibrate `shipping_eur_per_kg` against a few Superbuy parcels.
 
+## Phase 2: seller messages, arrival check and seller scorecard
+
+```bash
+resell msg N3DS                    # Chinese message + German translation (also: iPod, "Vita card", generic)
+resell msg N3DS --zh | pbcopy      # just the Chinese, to the clipboard (Windows: | clip)
+resell msg -s serial_unclear       # follow-ups: video, serial_unclear, white_screen, discount, multiple, ...
+resell inspect -k N3DS --listing "<goofish link>" --serial "QJF..." --paid 215 --bought 2026-10-20
+resell sellers -k N3DS             # scorecard
+resell seller-note "小陈电玩" --status preferred --note "fewest major flaws"
+resell serve                       # same things as web pages: Seller messages / Arrival check / Sellers
+```
+
+**Seller messages** live in `resell/content/messages.yaml`: N3DS, iPod Classic/5th gen, Vita card,
+generic, and short follow-ups. Each question notes which Phase 0 problem it guards against. The
+N3DS one adds the angled shot for dust and spiderwebs, a readable serial label, JP/US version,
+and smoke smell. The web page has copy buttons.
+
+**Arrival check** lives in `resell/content/checklists.yaml`: 9–16 checks per category, each mapped
+to a Phase 0 flaw group.
+- Mark each check OK / minor / flaw / n/a. "Minor" is only offered where it makes sense.
+  Yellow and dust always count as real flaws (`flaw_always_major`).
+- **Serials:** the serial is checked against `known_fake_serials` and against every serial already
+  in your Sales Sheet and your past inspections.
+- **Seller:** paste the Goofish link and the seller is looked up from its storefront code.
+- **Checklist answer:** record whether the seller answered your message (answered / partial /
+  ignored / not sent).
+
+**Seller scorecard:** for each seller it shows units bought and sold, flaw rate, major flaw rate,
+average profit, profit on cost, last purchase, checklist answer rate, storefront codes, and your
+status and notes (preferred / ok / watch / avoid).
+- It starts from the Sales Sheet, using Phase 0 seller identification.
+- An inspection replaces the comment-based flaw flag for the same unit. Units are matched by
+  serial, or by category, date and price.
+- Inspected units not yet in the sheet count too.
+
+**Storage:** inspections and seller notes are stored in the `inspections` and `seller_notes` tables.
+`resell import` never drops them. The storefront map is rebuilt on every import.
+
+**Known limits**
+- Inspections are linked to sheet rows by serial, or by category + buy date + price (±€2.50).
+  Enter a serial or the buy date and price so the link works.
+- The checklist answer rate only counts inspections you record from now on. There is no history for it.
+
 ## Tests
 
 ```bash

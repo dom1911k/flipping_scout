@@ -1,0 +1,121 @@
+# Pre-purchase messages for Xianyu sellers. Chinese is what you send; German is so you know what it says.
+# Edit freely - `resell msg` and the web page read this file on every call.
+# Each numbered question maps to something that went wrong in your Phase 0 data (see "why").
+
+templates:
+  N3DS:
+    title: New 3DS XL / LL (dual IPS)
+    zh: |
+      你好，请问还在吗？下单前想麻烦您帮忙确认几点，谢谢！
+      1. 两个屏幕亮度调到最高，打开一张纯白的图片或网页，在自然光下拍一张，想看看有没有黄边、坏点、亮点、灰尘或异物。
+      2. 上屏请斜着对着光拍一张，看看玻璃下面有没有灰尘、毛发或蜘蛛网一样的纹路。
+      3. 背面序列号标签请拍一张清楚的照片，每个字符都能看清。
+      4. 请问是原装外壳吗？有没有拆过、换过壳或换过屏？是日版还是美版？
+      5. 3D、摄像头、WiFi、所有按键、摇杆和C摇杆都正常吗？电池换过吗？
+      6. 机器有没有烟味或者其他异味？
+      没问题的话我马上拍，谢谢！
+    de: |
+      Hallo, ist es noch verfügbar? Bevor ich kaufe, würde ich Sie bitten, ein paar Punkte zu bestätigen, danke!
+      1. Beide Bildschirme auf maximale Helligkeit, ein rein weißes Bild oder eine weiße Webseite öffnen und bei Tageslicht fotografieren – ich möchte sehen, ob es gelbe Ränder, Pixelfehler, helle Punkte, Staub oder Fremdkörper gibt.
+      2. Bitte den oberen Bildschirm schräg gegen das Licht fotografieren, um zu sehen, ob unter dem Glas Staub, Haare oder spinnennetzartige Muster sind.
+      3. Bitte ein scharfes Foto vom Seriennummer-Etikett auf der Rückseite, auf dem jedes Zeichen lesbar ist.
+      4. Ist das Gehäuse original? Wurde es geöffnet, das Gehäuse oder ein Bildschirm getauscht? Japanische oder US-Version?
+      5. Funktionieren 3D, Kameras, WLAN, alle Tasten, Circle Pad und C-Stick? Wurde der Akku getauscht?
+      6. Riecht das Gerät nach Rauch oder anders?
+      Wenn alles passt, kaufe ich sofort, danke!
+    why:
+      - "1-2: yellow edges (2025) and dust/hair/spiderwebs under the top screen (2026) are your most common flaws"
+      - "3: one serial (QW13030465 8) turned up on three reshelled units - check every label against the blacklist"
+      - "4: reshells, 'code mismatch' and US units with fake serials"
+      - "6: three units had a smoke smell"
+
+  iPod:
+    title: iPod Classic / iPod Video (5th gen), modded
+    zh: |
+      你好，请问还在吗？下单前想确认几点，谢谢！
+      1. 现在用的是什么存储（SD卡转接、mSATA、CF还是固态）？容量多大？可以拍一下“设置 > 关于”显示容量的界面吗？
+      2. 电池是多少毫安的？是新换的吗？充满电大概能用多久？
+      3. 耳机孔左右声道都正常吗？有没有杂音或者断断续续？
+      4. 转盘上、下、左、右和中间键都灵敏吗？有没有失灵或者卡顿？
+      5. 屏幕打开白色背景的界面拍一张，看看有没有坏点、划痕或进灰。
+      6. 有没有把存储装满测试过？同步音乐的时候有没有出过错？
+      7. 外壳和后盖是原装的还是换过的？
+      没问题的话我马上拍，谢谢！
+    de: |
+      Hallo, ist es noch verfügbar? Bevor ich kaufe, möchte ich ein paar Punkte klären, danke!
+      1. Welcher Speicher ist verbaut (SD-Adapter, mSATA, CF oder SSD) und wie groß? Können Sie den Bildschirm „Einstellungen > Info“ mit der Kapazität fotografieren?
+      2. Wie viel mAh hat der Akku? Ist er neu? Wie lange hält er ungefähr mit einer Ladung?
+      3. Funktionieren beide Kanäle der Kopfhörerbuchse? Gibt es Rauschen oder Aussetzer?
+      4. Reagiert das Click Wheel oben, unten, links, rechts und die Mitteltaste zuverlässig? Gibt es Aussetzer oder Hänger?
+      5. Bitte ein Foto des Bildschirms mit weißem Hintergrund, um Pixelfehler, Kratzer oder Staub zu sehen.
+      6. Wurde der Speicher einmal komplett vollgeschrieben und getestet? Gab es beim Synchronisieren Fehler?
+      7. Sind Gehäuse und Rückseite original oder getauscht?
+      Wenn alles passt, kaufe ich sofort, danke!
+    why:
+      - "3: two iPod 5 units (Apr 2025) had audio issues or wouldn't turn on"
+      - "1, 6: a mod that shows the right size but fails when nearly full only shows up later as a return"
+
+  Vita card:
+    title: PS Vita memory card
+    zh: |
+      你好，请问还在吗？下单前想确认几点，谢谢！
+      1. 是索尼原装的记忆卡吗？还是兼容卡或者转接卡？
+      2. 可以插在PSV上，拍一下显示记忆卡总容量和可用空间的界面吗？
+      3. 已经格式化了吗？换账号以后能正常使用吗？读写都正常吗？
+      4. 卡的触点和外壳有没有磨损？
+      没问题的话我马上拍，谢谢！
+    de: |
+      Hallo, ist es noch verfügbar? Bevor ich kaufe, möchte ich ein paar Punkte klären, danke!
+      1. Ist es eine originale Sony-Speicherkarte oder eine kompatible bzw. Adapterkarte?
+      2. Können Sie die Karte in eine PS Vita stecken und den Bildschirm mit Gesamtkapazität und freiem Speicher fotografieren?
+      3. Ist sie formatiert? Funktioniert sie nach einem Kontowechsel normal? Lesen und Schreiben ohne Fehler?
+      4. Sind die Kontakte oder das Gehäuse abgenutzt?
+      Wenn alles passt, kaufe ich sofort, danke!
+    why:
+      - "1-2: fakes report a capacity they don't have; only the console screen proves it"
+      - "3: cards used on another account must be formatted before a new account can use them"
+
+  generic:
+    title: Anything else (new category)
+    zh: |
+      你好，请问还在吗？下单前想确认几点，谢谢！
+      1. 功能都正常吗？有没有拆修过或者换过零件？
+      2. 可以在自然光下拍几张实物照片吗？正面、背面、侧面，还有有磨损的地方。
+      3. 方便的话可以拍一张开机状态的照片，或者录一个十几秒的小视频吗？
+      4. 有没有烟味或者其他异味？
+      5. 包括哪些配件？
+      没问题的话我马上拍，谢谢！
+    de: |
+      Hallo, ist es noch verfügbar? Bevor ich kaufe, möchte ich ein paar Punkte klären, danke!
+      1. Funktioniert alles? Wurde es geöffnet, repariert oder wurden Teile getauscht?
+      2. Können Sie bei Tageslicht ein paar Fotos machen? Vorderseite, Rückseite, Seiten und abgenutzte Stellen.
+      3. Wenn möglich: ein Foto im eingeschalteten Zustand oder ein kurzes Video (10–20 Sekunden)?
+      4. Riecht es nach Rauch oder anders?
+      5. Welches Zubehör ist dabei?
+      Wenn alles passt, kaufe ich sofort, danke!
+    why:
+      - "film cameras failed because they couldn't be verified before buying - if a seller can't show it working, skip it"
+
+# Short follow-ups you send often.
+snippets:
+  video:
+    zh: 方便的话可以录一个十几秒的开机和按键测试视频吗？谢谢！
+    de: Wenn es Ihnen passt, könnten Sie ein kurzes Video (10–20 Sekunden) vom Einschalten und Tastentest aufnehmen? Danke!
+  serial_unclear:
+    zh: 序列号标签的照片有点模糊，可以再拍一张清楚一点的吗？谢谢！
+    de: Das Foto vom Seriennummer-Etikett ist etwas unscharf, könnten Sie bitte noch ein schärferes machen? Danke!
+  white_screen:
+    zh: 可以再拍一张屏幕显示纯白画面的照片吗？亮度调到最高，谢谢！
+    de: Könnten Sie noch ein Foto mit rein weißem Bild auf dem Bildschirm machen, Helligkeit auf Maximum? Danke!
+  discount:
+    zh: 请问价格还能再优惠一点吗？可以的话我今天就拍。
+    de: Ist beim Preis noch etwas möglich? Wenn ja, kaufe ich noch heute.
+  multiple:
+    zh: 如果我一次买两台以上，可以给个优惠价吗？
+    de: Wenn ich zwei oder mehr Geräte auf einmal kaufe, können Sie mir einen besseren Preis machen?
+  ship_to_agent:
+    zh: 我是用集运仓库收货的，麻烦发货的时候包装好一点，谢谢！
+    de: Ich lasse an ein Sammellager (Agent) liefern – bitte gut verpacken, danke!
+  decline:
+    zh: 谢谢您的回复，这台我先不考虑了，祝您生意顺利！
+    de: Danke für Ihre Antwort, dieses Gerät nehme ich vorerst nicht. Viel Erfolg beim Verkauf!

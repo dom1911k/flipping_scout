@@ -1,71 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Buy Calculator</title>
-<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
-<style>
-:root {
-  --bg: #fcfcfb; --panel: #ffffff; --ink: #0b0b0b; --ink2: #52514e; --muted: #8a8984; --line: #e4e3df;
-  --accent: #2a78d6; --pass: #1a7f37; --pass-bg: #e7f5ea; --warn: #8a5a00; --warn-bg: #fdf3dc;
-  --fail: #b42318; --fail-bg: #fdeceb;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #1a1a19; --panel: #222221; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8f8e88; --line: #3a3a38;
-    --accent: #3987e5; --pass: #6fcf8a; --pass-bg: #1f3325; --warn: #f0c060; --warn-bg: #3a3020;
-    --fail: #f2837a; --fail-bg: #3d2322; }
-}
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
-main { max-width: 960px; margin: 0 auto; padding: 20px 16px 48px; }
-h1 { font-size: 18px; margin: 0 0 4px; }
-.sub { color: var(--ink2); font-size: 13px; margin-bottom: 16px; overflow-wrap: anywhere; }
-.grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
-.grid > * { min-width: 0; }
-@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
-form, .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
-.modes { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px; margin-bottom: 14px; }
-.modes label { flex: 1; text-align: center; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--ink2); }
-.modes input { display: none; }
-.modes input:checked + span { color: var(--ink); font-weight: 600; }
-.modes label:has(input:checked) { background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
-.field { margin-bottom: 10px; }
-.field label { display: block; font-size: 12px; color: var(--ink2); margin-bottom: 3px; }
-.field input, .field select { width: 100%; padding: 7px 9px; font: inherit; color: var(--ink); background: var(--bg);
-  border: 1px solid var(--line); border-radius: 6px; }
-.field input:focus, .field select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
-.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.only-calc { display: none; }
-form:has(input[value=calc]:checked) .only-calc { display: block; }
-form:has(input[value=calc]:checked) .only-max { display: none; }
-details summary { cursor: pointer; font-size: 13px; color: var(--ink2); margin: 6px 0 10px; }
-button { width: 100%; padding: 9px; font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; }
-.hint { font-size: 12px; color: var(--muted); }
-.hero { font-size: 40px; font-weight: 700; letter-spacing: -0.5px; margin: 2px 0; }
-.hero small { font-size: 16px; font-weight: 500; color: var(--ink2); margin-left: 6px; }
-.verdict { display: inline-block; padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 13px; }
-.PASS { color: var(--pass); background: var(--pass-bg); }
-.BORDERLINE, .UNKNOWN { color: var(--warn); background: var(--warn-bg); }
-.FAIL { color: var(--fail); background: var(--fail-bg); }
-table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
-td { padding: 5px 0; border-bottom: 1px solid var(--line); }
-td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-tr.total td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--line); }
-td .hint { display: block; }
-.crit { list-style: none; padding: 0; margin: 10px 0 0; }
-.crit li { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-.crit .verdict { font-size: 11px; text-align: center; align-self: start; }
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 12px 0; }
-.stat { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
-.stat b { display: block; font-size: 17px; }
-.stat span { font-size: 12px; color: var(--ink2); }
-.error { color: var(--fail); background: var(--fail-bg); padding: 10px 12px; border-radius: 8px; }
-.htmx-request .hero { opacity: .5; }
-</style>
-</head>
-<body>
-<main>
+{% extends "base.html" %}
+{% block title %}Buy Calculator{% endblock %}
+{% block content %}
   <h1>Buy calculator</h1>
   <div class="sub">Rate {{ "%.2f"|format(rate) }} RMB/€ from config{% if order_rate %} · your orders, last 60 days: {{ "%.2f"|format(order_rate) }}{% endif %}
     · targets ≥ €{{ targets.min_profit_eur|int }} profit and ≥ {{ (targets.min_profit_on_cost * 100)|int }}% on cost</div>
@@ -126,6 +61,4 @@ td .hint { display: block; }
     </form>
     <section id="result">{% include "_result.html" %}</section>
   </div>
-</main>
-</body>
-</html>
+{% endblock %}

@@ -7,12 +7,15 @@ from pathlib import Path
 
 import pandas as pd
 
-TABLES = ("sales", "purchases", "parse_issues")
+TABLES = ("sales", "purchases", "parse_issues", "storefronts")  # rebuilt on every import
 
 
 def connect(path: Path) -> sqlite3.Connection:
+    """Open the DB and make sure the hand-filled tables exist (they are never dropped)."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    return sqlite3.connect(path)
+    con = sqlite3.connect(path)
+    con.executescript(resources.files("resell").joinpath("schema_persistent.sql").read_text(encoding="utf-8"))
+    return con
 
 
 def reset(con: sqlite3.Connection) -> None:
@@ -28,4 +31,7 @@ def write(con: sqlite3.Connection, table: str, df: pd.DataFrame) -> None:
 
 
 def read(con: sqlite3.Connection, table: str) -> pd.DataFrame:
-    return pd.read_sql(f"SELECT * FROM {table}", con)
+    try:
+        return pd.read_sql(f"SELECT * FROM {table}", con)
+    except Exception:  # table not created yet (no import run)
+        return pd.DataFrame()

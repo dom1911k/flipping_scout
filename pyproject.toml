@@ -32,4 +32,4 @@ build-backend = "setuptools.build_meta"
 packages = ["resell", "resell.importers"]
 
 [tool.setuptools.package-data]
-resell = ["schema.sql", "templates/*.j2", "templates/*.html"]
+resell = ["schema.sql", "schema_persistent.sql", "templates/*.j2", "templates/*.html", "content/*.yaml"]
