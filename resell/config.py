@@ -46,6 +46,7 @@ class Config(BaseModel):
     targets: dict[str, float] = Field(default_factory=dict)
     category_profiles: dict[str, dict[str, Any]] = Field(default_factory=dict)
     replies: dict[str, Any] = Field(default_factory=dict)
+    research: dict[str, Any] = Field(default_factory=dict)
 
     root: Path = Path(".")
 

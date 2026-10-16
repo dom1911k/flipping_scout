@@ -14,6 +14,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from . import calc
 from . import inspection as insp
 from . import replies as rep
+from . import research as rs
 from .config import load_config
 
 env = Environment(loader=PackageLoader("resell", "templates"), autoescape=select_autoescape(["html"]))
@@ -176,6 +177,92 @@ def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
         form = dict(await request.form())
         insp.set_seller_note(cfg(), form["seller"], form.get("status") or None, form.get("notes", ""))
         return RedirectResponse("/sellers" + (f"?{form['back']}" if form.get("back") else ""), status_code=303)
+
+    # ------------------------------------------------------------------ Phase 4: research
+
+    @app.get("/research", response_class=HTMLResponse)
+    def research_list():
+        c = cfg()
+        cands, _, _ = rs.load(c)
+        if cands.empty:
+            rs.seed(c)
+        return HTMLResponse(env.get_template("research.html").render(active="/research", rows=rs.assess_all(c)))
+
+    @app.post("/research/new")
+    async def research_new(request: Request):
+        form = dict(await request.form())
+        try:
+            cid = rs.add_candidate(cfg(), form["name"].strip(), status="idea")
+        except ValueError:
+            cid = rs.slug(form["name"])
+        return RedirectResponse(f"/research/{cid}", status_code=303)
+
+    def candidate_page(cid: str, msg=None, preview=None, preview_raw="", preview_source=""):
+        c = cfg()
+        cands, findings, ev = rs.load(c)
+        row = cands[cands.id == cid]
+        if row.empty:
+            return HTMLResponse("unknown candidate", status_code=404)
+        a = rs.assess(c, row.to_dict("records")[0], findings, ev)
+        eu_rows = a.eu.sort_values("date", ascending=False).assign(
+            date=lambda d: d.date.dt.date.astype(str).replace("NaT", "–")).to_dict("records") if len(a.eu) else []
+        cn_rows = a.cn.sort_values("id", ascending=False).to_dict("records") if len(a.cn) else []
+        return HTMLResponse(env.get_template("candidate.html").render(
+            active="/research", a=a, eu_rows=eu_rows, cn_rows=cn_rows, msg=msg, preview=preview,
+            preview_raw=preview_raw, preview_source=preview_source, statuses=rs.STATUSES, edges=rs.EDGES,
+            testability=rs.TESTABILITY, criteria=rs.CRITERIA))
+
+    @app.get("/research/{cid}", response_class=HTMLResponse)
+    def research_detail(cid: str):
+        return candidate_page(cid)
+
+    @app.post("/research/{cid}/edit")
+    async def research_edit(cid: str, request: Request):
+        form = dict(await request.form())
+        fields = {k: (form.get(k) or "").strip() or None for k in
+                  ("status", "discontinued", "china_edge", "testability", "keywords_zh", "keywords_eu",
+                   "calc_category", "own_sales_match", "notes")}
+        fields["status"] = fields["status"] or "idea"
+        fields["weight_kg"] = _num(form.get("weight_kg"))
+        fields["hype"] = int(bool(form.get("hype")))
+        fields["new_devices"] = int(bool(form.get("new_devices")))
+        try:
+            rs.update_candidate(cfg(), cid, **fields)
+        except ValueError as e:
+            return candidate_page(cid, msg=f"Not saved: {e}")
+        return RedirectResponse(f"/research/{cid}", status_code=303)
+
+    @app.post("/research/{cid}/eu", response_class=HTMLResponse)
+    async def research_eu(cid: str, request: Request):
+        form = dict(await request.form())
+        raw, source = form.get("paste", ""), form.get("source", "manual")
+        points = rs.parse_sold_paste(raw)
+        if not points:
+            return candidate_page(cid, msg="No prices found in the paste - it needs prices with a currency (€, EUR, $, £).")
+        if form.get("preview"):
+            return candidate_page(cid, preview=points, preview_raw=raw, preview_source=source)
+        n = rs.add_evidence(cfg(), cid, "eu_sold", points, source)
+        return candidate_page(cid, msg=f"Saved {n} EU sold prices from {source}.")
+
+    @app.post("/research/{cid}/cn", response_class=HTMLResponse)
+    async def research_cn(cid: str, request: Request):
+        form = dict(await request.form())
+        points = [p for line in (form.get("paste") or "").splitlines() if line.strip() and (p := rs.parse_cn_text(line))]
+        if not points:
+            return candidate_page(cid, msg="No price found - include ¥ or 元, or just the number.")
+        n = rs.add_evidence(cfg(), cid, "cn_asking", points, "xianyu")
+        return candidate_page(cid, msg=f"Added {n} Xianyu price(s).")
+
+    @app.post("/research/{cid}/finding")
+    async def research_finding(cid: str, request: Request):
+        form = dict(await request.form())
+        rs.add_finding(cfg(), cid, int(form.get("criterion", 0)), form.get("text", ""), form.get("source"))
+        return RedirectResponse(f"/research/{cid}", status_code=303)
+
+    @app.post("/research/{cid}/delete/{table}/{row_id}")
+    def research_delete(cid: str, table: str, row_id: int):
+        rs.delete_row(cfg(), table, row_id)
+        return RedirectResponse(f"/research/{cid}", status_code=303)
 
     # ------------------------------------------------------------------ Phase 3: replies
 

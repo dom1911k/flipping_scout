@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Category Research{% endblock %}
+{% block content %}
+<h1>Category research</h1>
+<div class="sub">Each candidate is scored on your five criteria from the evidence you've collected. Unknown = no evidence yet; the "next step" says what would fill the biggest gap.</div>
+<div class="card wide">
+  <table class="data">
+    <tr><th>Category</th><th>Status</th><th>Verdict</th>
+      <th title="No longer manufactured">1 Disc.</th><th title="Not hype-driven">2 Hype</th><th title="China version better">3 China</th>
+      <th title="Easy to verify and test">4 Test</th><th title="Profit target">5 Profit</th>
+      <th>EU median</th><th>Xianyu median</th><th>Est. profit</th><th>Next step</th></tr>
+    {% for a in rows %}
+    <tr>
+      <td class="name"><a href="/research/{{ a.cand.id }}" style="color:var(--ink);font-weight:600">{{ a.cand.name }}</a></td>
+      <td class="hint">{{ a.cand.status }}</td>
+      <td><span class="verdict {{ a.verdict }}">{{ a.verdict }}</span></td>
+      {% for c in a.criteria %}<td><span class="verdict {{ c.status }}" title="{{ c.reason }}" style="font-size:11px">{{ c.status[:4] }}</span></td>{% endfor %}
+      <td>{% if a.eu_median %}€{{ "%.0f"|format(a.eu_median) }}<div class="hint">n={{ a.eu_n }}</div>{% else %}–{% endif %}</td>
+      <td>{% if a.cn_median_rmb %}¥{{ "%.0f"|format(a.cn_median_rmb) }}<div class="hint">n={{ a.cn_n }}</div>{% else %}–{% endif %}</td>
+      <td>{% if a.estimate %}€{{ "%.0f"|format(a.estimate.profit) }}<div class="hint">{{ (a.estimate.profit_on_cost * 100)|round|int }}% on cost</div>
+        {% elif a.own %}€{{ "%.0f"|format(a.own.profit) }}<div class="hint">{{ (a.own.poc * 100)|round|int }}% · your sales</div>{% else %}–{% endif %}</td>
+      <td class="hint" style="min-width:220px">{{ a.next_steps[0] if a.next_steps else "" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+<form method="post" action="/research/new" class="card" style="margin-top:14px;display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+  <div class="field" style="margin:0;flex:1;min-width:220px"><label>Add a candidate</label>
+    <input name="name" placeholder="e.g. Nintendo DS Lite IPS-modded" required></div>
+  <button style="width:auto;padding:8px 16px">Add</button>
+</form>
+{% endblock %}

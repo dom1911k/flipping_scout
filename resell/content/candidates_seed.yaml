@@ -1,0 +1,150 @@
+# Starting point for the research workspace (`resell research seed` inserts these once; edit in the UI).
+# Findings come from a first web research pass (Oct 2026). Each finding names its source; things the
+# pass could NOT confirm say so. Criteria: 1 discontinued, 2 not hype, 3 China version better,
+# 4 easy to verify and test, 5 profit. 0 = general.
+
+candidates:
+  - id: n3ds
+    name: New 3DS XL dual IPS (benchmark)
+    calc_category: N3DS
+    own_sales_match: "n3ds"
+    status: active
+    discontinued: "New 3DS XL production ended 2019-2020"
+    china_edge: modded
+    testability: easy
+    weight_kg: 0.40
+    keywords_zh: "new3dsll 双ips"
+    keywords_eu: "New 3DS XL dual IPS"
+    notes: "Your main category - here as the yardstick the candidates are compared against."
+    findings: []
+
+  - id: ipod-classic
+    name: iPod Classic 7th gen, modded (benchmark)
+    calc_category: iPod
+    own_sales_match: "ipod 7|ipod classic \\(7|ipod 512|ipod classic 7"
+    status: active
+    discontinued: "iPod Classic discontinued 2014"
+    china_edge: modded
+    testability: easy
+    weight_kg: 0.22
+    keywords_zh: "ipod classic 改装 512g"
+    keywords_eu: "iPod Classic 512GB"
+    notes: "Best-fit category so far - the other yardstick."
+    findings: []
+
+  - id: vita-oled
+    name: PS Vita OLED (PCH-1000), modded
+    status: researching
+    discontinued: "PCH-1000 replaced by the LCD PCH-2000 in Oct 2013; Vita line ended 1 Mar 2019"
+    china_edge: modded
+    testability: medium
+    weight_kg: 0.30
+    keywords_zh: "psv1000 破解, psv1000 oled, psv 改机 sd2vita"
+    keywords_eu: "PS Vita 1000 OLED, PCH-1000"
+    findings:
+      - criterion: 1
+        text: "Discontinued: the OLED PCH-1000 was replaced by the LCD PCH-2000 in Oct 2013; the whole Vita line ended 1 Mar 2019."
+        source: https://en.wikipedia.org/wiki/PlayStation_Vita
+      - criterion: 3
+        text: "China sells 'cracked' (破解, HENkaku + SD2Vita) units, the same pattern as your modded 3DS. SD2Vita adapters cost ~$1 wholesale, so a big-storage modded Vita is cheap to make. An older smzdm article put a working PSV1000 at ~300 RMB (dated - check current Xianyu prices)."
+        source: https://post.smzdm.com/p/a46z9x68/
+      - criterion: 4
+        text: "Early OLED panels often show black spots / mura patches, most visible on dark screens; burn-in is mentioned in buyer reviews. Ask for photos on a BLACK and a WHITE screen, plus front/rear touch and all buttons."
+        source: https://lr.ggtyler.dev/r/vita/comments/1ezub8c/oled_screen_black_lines_and_smudges
+      - criterion: 0
+        text: "Synergy and risk: your Vita memory card buyers are Vita owners (cross-sell), but a modded Vita with SD2Vita removes the need for Sony memory cards - it can cannibalise that filler."
+        source: own experience
+      - criterion: 2
+        text: "Not checked yet - paste Terapeak sold data for 'PS Vita 1000' (3 years) to see the trend."
+        source: ""
+
+  - id: psp
+    name: PSP 3000 (IPS-modded) / PSP Go
+    status: researching
+    discontinued: "PSP Go production ended Apr 2011; PSP-3000 continued until the Vita era (end date not confirmed in this pass)"
+    china_edge: modded
+    testability: medium
+    weight_kg: 0.25
+    keywords_zh: "psp3000 ips, psp3000 改ips屏, pspgo"
+    keywords_eu: "PSP 3000, PSP Go"
+    findings:
+      - criterion: 1
+        text: "PSP Go production ended Apr 2011 (Japan). The PSP-3000 stayed in production until its successor (Vita) - exact end date not confirmed here."
+        source: https://www.techspot.com/news/43401-sony-to-discontinue-the-psp-go.html
+      - criterion: 3
+        text: "An IPS screen kit is a real upgrade for the 3000: users report a much brighter, clearer image. A Japanese shop sells a no-solder kit for ¥9,800 and sold out quickly; Chinese suppliers are moving to laminated kits. A Chinese 'PSP3000 改IPS' unit would be a better version than typical EU stock - check Xianyu supply."
+        source: https://www.gdm.or.jp/crew/2026/0417/631148
+      - criterion: 4
+        text: "Check: motherboard revision (many 3000 IPS kits reportedly don't fit 07g boards), UMD drive, battery. The PSP Go battery is not user-replaceable - ask about runtime. Reshells can arrive with scratched faceplates."
+        source: https://electronics.alibaba.com/product/ips-psp-screen
+      - criterion: 2
+        text: "Not checked yet - paste Terapeak sold data for 'PSP 3000' and 'PSP Go'."
+        source: ""
+
+  - id: ipod-mini
+    name: iPod mini, SD-modded (nano can't be flash-modded)
+    calc_category: iPod
+    own_sales_match: "ipod mini"
+    status: researching
+    discontinued: "iPod mini replaced by the nano in Sept 2005"
+    china_edge: modded
+    testability: easy
+    weight_kg: 0.15
+    keywords_zh: "ipod mini 改装, ipod mini sd卡, ipod mini 2代"
+    keywords_eu: "iPod mini SD, iPod mini 128GB"
+    findings:
+      - criterion: 3
+        text: "The mini takes CompactFlash, so iFlash SD-CF adapters work natively; owners report 128-256GB SD cards working (card compatibility varies by model). The iPod NANO uses soldered flash and CANNOT be modded this way - drop 'flash-modded nano' as a candidate."
+        source: https://ipodwiki.com/wiki/SD-CF_Adapter
+      - criterion: 4
+        text: "Same checks as your iPod Classics (capacity, fill test, both channels, wheel), plus battery: SDXC draws more power than CF (~20% shorter runtime reported), so a new battery is part of a good mod. Case bezels are glued - look for pry marks."
+        source: https://ipodwiki.com/wiki/SD-CF_Adapter
+      - criterion: 0
+        text: "Fits your best category: same buyers, same checklist, same sellers (ask your iPod Classic sellers if they do minis)."
+        source: own experience
+      - criterion: 2
+        text: "Not checked yet - paste Terapeak sold data for 'iPod mini'."
+        source: ""
+
+  - id: gba-sp-101
+    name: GBA SP AGS-101 / IPS GBA SP
+    status: researching
+    discontinued: "GBA SP production ended in the 2000s (exact date not confirmed here)"
+    china_edge: none
+    testability: medium
+    weight_kg: 0.20
+    keywords_zh: "gba sp 101, gbasp ips"
+    keywords_eu: "GBA SP AGS-101, GBA SP IPS"
+    findings:
+      - criterion: 3
+        text: "Why your GB sales made ~€22: the 'better version' (IPS screen) is a €36-44 kit Shenzhen sellers ship straight to EU buyers on eBay.de, and EU modders (e.g. dragonbox.de, RetroSix kits ~€80) build the same units locally. China has no real edge here - it's the same modded product at a similar cost."
+        source: https://www.ebay.de/itm/356323105357
+      - criterion: 4
+        text: "A genuine AGS-101 is hard to verify from photos: the bottom sticker (AGS-101 vs AGS-001) is the main check, reshells are common, and forum tells (extra dot under the battery cover, speaker-hole alignment) are disputed. This is a 'fake serial' risk like your 3DS reshells."
+        source: https://pol1.lr.ggtyler.dev/r/GameboyAdvance/comments/1i7en57/original_or_reshell
+      - criterion: 5
+        text: "Your data: 2 GB-family sales, €10 and €35 profit (bought €110-120, sold €130-145). Too few to judge, but consistent with the point above."
+        source: own sales
+      - criterion: 2
+        text: "Not checked yet - paste Terapeak sold data for 'GBA SP AGS-101'."
+        source: ""
+
+  - id: minidisc
+    name: MiniDisc portable players (Sony Hi-MD, e.g. MZ-RH1)
+    status: researching
+    discontinued: "Sony stopped making MiniDisc Walkmans in 2011-2013 (not confirmed in this pass)"
+    china_edge: arbitrage
+    testability: hard
+    weight_kg: 0.20
+    keywords_zh: "md随身听, minidisc, mz-rh1"
+    keywords_eu: "Sony MZ-RH1, MiniDisc Walkman"
+    findings:
+      - criterion: 3
+        text: "No 'better China version': the main supply is Japan, and Japanese eBay sellers already list MZ-RH1 units to EU buyers at about $410-950 asking. China supply on Xianyu is unknown - check it before going further."
+        source: https://radar.stereonet.com/listing/101092-sony-hi-md-walkman-mz-rh1
+      - criterion: 4
+        text: "Hard to verify remotely (like your film cameras): it needs a real disc to test playback AND recording; many MZ-RH1 screens are dead; the jog lever can come off. Ask for a video of play + record."
+        source: https://www.ebay.de/itm/157082167884
+      - criterion: 2
+        text: "Prices look very high and spread out (asking $410-950 for RH1) - this could be revival hype. Needs Terapeak sold data over 3 years before deciding."
+        source: https://radar.stereonet.com/listing/101092-sony-hi-md-walkman-mz-rh1

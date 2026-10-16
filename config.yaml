@@ -160,3 +160,8 @@ replies:
     first_step_pct: 0.07     # "what's your best price?" -> asking minus ~7% (300 -> 280)
     accept_within: 5         # accept an offer if a fair counter would be within €5 of it
     lowball_pct: 0.80        # below 80% of the floor = lowball: polite no + your floor
+
+# ---------------------------------------------------------------- Phase 4: category research
+research:
+  # Rough conversion for pasted USD/GBP sold prices (EUR and CNY are handled already). Update now and then.
+  fx_to_eur: {USD: 0.86, GBP: 1.15}

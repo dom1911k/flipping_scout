@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ a.cand.name }}{% endblock %}
+{% block content %}
+<p class="hint"><a href="/research">← all candidates</a></p>
+<h1>{{ a.cand.name }} <span class="verdict {{ a.verdict }}" style="vertical-align:middle">{{ a.verdict }}</span></h1>
+<div class="sub">{{ a.verdict_reason }}</div>
+{% if msg %}<div class="ok-msg">{{ msg }}</div>{% endif %}
+{% for w in a.warnings %}<div class="warn-msg">⚠ {{ w }}</div>{% endfor %}
+{% if a.next_steps %}<div class="card" style="margin-bottom:14px"><b>Next steps</b><ul style="margin:6px 0 0;padding-left:18px">
+  {% for s in a.next_steps %}<li>{{ s }}</li>{% endfor %}</ul></div>{% endif %}
+
+<div class="grid">
+  <div>
+    <form method="post" action="/research/{{ a.cand.id }}/edit" class="card">
+      <b>Basics</b>
+      <div class="row" style="margin-top:8px">
+        <div class="field"><label>Status</label><select name="status">{% for s in statuses %}<option {% if a.cand.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="field"><label>Weight kg</label><input name="weight_kg" value="{{ a.cand.weight_kg or '' }}"></div>
+      </div>
+      <div class="field"><label>1 · Discontinued (when, source)</label><input name="discontinued" value="{{ a.cand.discontinued or '' }}"></div>
+      <div class="row">
+        <div class="field"><label>3 · China edge</label><select name="china_edge"><option value="">unknown</option>{% for s in edges %}<option {% if a.cand.china_edge == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+        <div class="field"><label>4 · Testability</label><select name="testability"><option value="">unknown</option>{% for s in testability %}<option {% if a.cand.testability == s %}selected{% endif %}>{{ s }}</option>{% endfor %}</select></div>
+      </div>
+      <div class="field"><label>Xianyu search terms</label><input name="keywords_zh" value="{{ a.cand.keywords_zh or '' }}"></div>
+      <div class="field"><label>eBay / Terapeak search terms</label><input name="keywords_eu" value="{{ a.cand.keywords_eu or '' }}"></div>
+      <div class="row">
+        <div class="field"><label>Cost profile</label><input name="calc_category" placeholder="e.g. iPod (empty = new)" value="{{ a.cand.calc_category or '' }}"></div>
+        <div class="field"><label>Own sales matching</label><input name="own_sales_match" placeholder="regex on item names" value="{{ a.cand.own_sales_match or '' }}"></div>
+      </div>
+      <label style="display:flex;gap:8px;font-size:14px;margin:4px 0"><input type="checkbox" name="hype" value="1" {% if a.cand.hype %}checked{% endif %}> Hype-driven (force criterion 2 to FAIL)</label>
+      <label style="display:flex;gap:8px;font-size:14px;margin:4px 0 10px"><input type="checkbox" name="new_devices" value="1" {% if a.cand.new_devices %}checked{% endif %}> I'd import NEW devices (ElektroG check)</label>
+      <div class="field"><label>Notes</label><input name="notes" value="{{ a.cand.notes or '' }}"></div>
+      <button>Save</button>
+    </form>
+
+    <form method="post" action="/research/{{ a.cand.id }}/eu" class="card" style="margin-top:14px">
+      <b>EU sold prices</b>
+      <p class="hint">In Terapeak (Seller Hub → Research → Sold, last 3 years) or eBay.de “Verkaufte Artikel”: select the results, copy, paste here. Lines like “12.10.2026 149 €” work too.</p>
+      <div class="field"><label>Source</label><select name="source">{% for s in ["terapeak", "ebay_sold", "pricecharting", "kleinanzeigen", "manual"] %}<option>{{ s }}</option>{% endfor %}</select></div>
+      <textarea name="paste" rows="6" style="width:100%;font:inherit;font-size:13px;padding:8px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px" placeholder="paste here"></textarea>
+      <label style="display:flex;gap:8px;font-size:13px;margin:6px 0 10px"><input type="checkbox" name="preview" value="1" checked> Preview before saving</label>
+      <button>Read prices</button>
+    </form>
+
+    <form method="post" action="/research/{{ a.cand.id }}/cn" class="card" style="margin-top:14px">
+      <b>Xianyu prices</b>
+      <p class="hint">Paste a Xianyu share text, or type a price. One listing per line is fine.</p>
+      <textarea name="paste" rows="3" style="width:100%;font:inherit;font-size:13px;padding:8px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px" placeholder="「psv1000 破解 64g」 ¥680 https://m.tb.cn/..."></textarea>
+      <button style="margin-top:8px">Add</button>
+    </form>
+  </div>
+
+  <div>
+    {% if preview %}
+    <form method="post" action="/research/{{ a.cand.id }}/eu" class="card" style="margin-bottom:14px">
+      <b>Preview: {{ preview|length }} prices found</b>
+      <input type="hidden" name="source" value="{{ preview_source }}"><textarea name="paste" hidden>{{ preview_raw }}</textarea>
+      <table class="data" style="margin-top:8px"><tr><th>Date</th><th>Price</th><th>Title</th><th>Condition</th></tr>
+        {% for p in preview %}<tr><td>{{ p.date or '–' }}</td><td>{{ p.currency }} {{ "%.2f"|format(p.price) }}</td><td>{{ p.title or '' }}</td><td>{{ p.condition or '' }}</td></tr>{% endfor %}
+      </table>
+      <p class="hint">Rows without a date still count for the median, not for the trend. Wrong rows? Fix the paste and read again.</p>
+      <button>Save {{ preview|length }} prices</button>
+    </form>
+    {% endif %}
+
+    <div class="card">
+      <b>Your five criteria</b>
+      <ul class="crit">
+        {% for c in a.criteria %}<li><span class="verdict {{ c.status }}">{{ c.status }}</span><span><b>{{ c.name[3:] }}</b> — {{ c.reason }}
+          {% for f in a.findings.get(loop.index, []) %}<div class="hint" style="margin-top:4px">• {{ f.text }}{% if f.source %} <a href="{{ f.source }}" target="_blank" rel="noopener">{{ 'source' if f.source.startswith('http') else f.source }}</a>{% endif %}</div>{% endfor %}
+        </span></li>{% endfor %}
+      </ul>
+      {% for f in a.findings.get(0, []) %}<div class="hint" style="margin-top:6px">• {{ f.text }}{% if f.source %} <a href="{{ f.source }}" target="_blank" rel="noopener">{{ 'source' if f.source.startswith('http') else f.source }}</a>{% endif %}</div>{% endfor %}
+      <form method="post" action="/research/{{ a.cand.id }}/finding" style="margin-top:12px;display:grid;grid-template-columns:110px 1fr;gap:6px">
+        <select name="criterion">{% for k, v in criteria.items() %}<option value="{{ k }}">{{ k }} {{ v }}</option>{% endfor %}</select>
+        <input name="text" placeholder="Add a finding..." required style="padding:6px">
+        <span></span><input name="source" placeholder="source link (optional)" style="padding:6px">
+        <span></span><button class="copy" style="justify-self:start">Add finding</button>
+      </form>
+    </div>
+
+    {% if a.estimate %}{% set r = a.estimate %}
+    <div class="card" style="margin-top:14px">
+      <b>Profit at median prices</b>
+      <div class="hero" style="font-size:30px">€{{ "%.0f"|format(r.profit) }}<small>{{ (r.profit_on_cost * 100)|round|int }}% on cost</small></div>
+      <div class="hint">Buy ¥{{ "%.0f"|format(r.inputs.rmb) }} → landed €{{ "%.0f"|format(r.landed.total) }} (incl. {{ 'import VAT' if r.landed.vat_on else 'no import VAT' }}) · sell €{{ "%.0f"|format(r.selling.price) }}
+        {% if a.max_rmb %} · pay at most <b>¥{{ "%.0f"|format(a.max_rmb) }}</b> for your targets{% endif %}</div>
+    </div>
+    {% endif %}
+
+    <div class="card wide" style="margin-top:14px">
+      <b>EU sold prices</b> <span class="hint">{{ a.eu_n }} sales{% if a.eu_median %}, median €{{ "%.0f"|format(a.eu_median) }}{% endif %}{% if a.eu_median_90d %}, last 90 days €{{ "%.0f"|format(a.eu_median_90d) }}{% endif %}{% if a.trend_12m is not none %}, 12-month trend {{ "%+.0f"|format(a.trend_12m * 100) }}%{% endif %}</span>
+      {% if a.eu_by_quarter %}
+      <table class="data" style="margin-top:8px"><tr><th>Quarter</th>{% for q in a.eu_by_quarter %}<td class="hint">{{ q.quarter }}</td>{% endfor %}</tr>
+        <tr><th>Median</th>{% for q in a.eu_by_quarter %}<td>€{{ "%.0f"|format(q.median) }}</td>{% endfor %}</tr>
+        <tr><th>Sales</th>{% for q in a.eu_by_quarter %}<td class="hint">{{ q.n }}</td>{% endfor %}</tr></table>
+      {% endif %}
+      {% if eu_rows %}<details style="margin-top:8px"><summary>All {{ eu_rows|length }} rows</summary>
+        <table class="data"><tr><th>Date</th><th>€</th><th>Source</th><th>Title</th><th></th></tr>
+        {% for e in eu_rows %}<tr><td>{{ e.date }}</td><td>{{ "%.0f"|format(e.eur) }}</td><td class="hint">{{ e.source }}</td><td>{{ e.title or '' }}</td>
+          <td>{% if e.id %}<form method="post" action="/research/{{ a.cand.id }}/delete/evidence/{{ e.id }}" style="padding:0;border:0;background:none"><button class="copy" style="background:var(--line);color:var(--ink);padding:2px 8px">×</button></form>{% endif %}</td></tr>{% endfor %}
+        </table></details>{% endif %}
+    </div>
+
+    <div class="card wide" style="margin-top:14px">
+      <b>Xianyu prices</b> <span class="hint">{{ a.cn_n }} listings{% if a.cn_median_rmb %}, median ¥{{ "%.0f"|format(a.cn_median_rmb) }}{% endif %}</span>
+      {% if cn_rows %}<table class="data" style="margin-top:8px"><tr><th>Date</th><th>¥</th><th>Title</th><th></th></tr>
+        {% for e in cn_rows %}<tr><td>{{ e.date or '' }}</td><td>{{ "%.0f"|format(e.price) }}</td><td>{% if e.url %}<a href="{{ e.url }}" target="_blank" rel="noopener">{{ e.title or 'link' }}</a>{% else %}{{ e.title or '' }}{% endif %}</td>
+          <td><form method="post" action="/research/{{ a.cand.id }}/delete/evidence/{{ e.id }}" style="padding:0;border:0;background:none"><button class="copy" style="background:var(--line);color:var(--ink);padding:2px 8px">×</button></form></td></tr>{% endfor %}
+      </table>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

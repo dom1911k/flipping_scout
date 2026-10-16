@@ -129,6 +129,53 @@ form still works as a normal page. It binds to 127.0.0.1 only.
 - Customs duty rates per tariff code aren't looked up. Set `duty_rate` per category if one applies.
 - Shipping is a flat €/kg estimate. Calibrate `shipping_eur_per_kg` against a few Superbuy parcels.
 
+## Phase 4 (first part): category research
+
+This is the core feature: evaluating NEW product categories on your five criteria before you spend money.
+
+```bash
+resell research                      # compare all candidates: ✓/~/✗/? per criterion, verdict, next step
+resell research vita-oled            # one candidate: findings with sources, prices, profit estimate, next steps
+pbpaste | resell research-paste vita-oled --source terapeak     # EU sold prices from a Terapeak/eBay copy-paste
+resell research-cn vita-oled "「psv1000 破解 64g」 ¥680"           # a Xianyu asking price (share text or number)
+resell research-add "Nintendo DS Lite IPS"
+resell serve                         # "Research" page (first tab): same, with paste boxes and forms
+```
+
+**Candidates** start from `resell/content/candidates_seed.yaml`. That holds your two benchmarks
+(N3DS, iPod Classic) and five candidates from the brief, each with findings from a first web
+research pass and a source link per finding. After that they live in the database, edited from the
+web page, and `resell import` never touches them.
+
+**Evidence and scoring**
+1. **Discontinued:** what you enter (production end and source).
+2. **Not hype:** the 12-month trend of EU sold prices. A least-squares slope over the last 12 months
+   needs ≥6 dated sales across 6+ months; older data compares year on year. It uses the same
+   thresholds as the calculator (≤ −10% fails), or you can set `hype` by hand.
+3. **China edge:** modded / refurbished pass, arbitrage is borderline, none fails.
+4. **Testability:** easy / medium / hard.
+5. **Profit:** the Phase 1 calculator at the median Xianyu price and the median EU sold price
+   (last 90 days if there are ≥3, else last 12 months). New categories include import VAT and a 5%
+   returns reserve. It also gives the max RMB to pay. For categories you already sell
+   (`own_sales_match`), your real last-12-month profit is used instead.
+
+**Getting prices in:**
+- **EU sold prices:** copy the results in Terapeak (Seller Hub → Research → Sold) or an eBay.de
+  "Verkaufte Artikel" search, and paste. The parser reads tab-separated tables row by row, and
+  eBay-style listings as title / price / "Verkauft <date>" blocks. It handles € / $ / £, and
+  German and English dates. The web page shows a preview before saving.
+- **Xianyu prices:** paste share texts (one per line) or type a price.
+
+**Next steps** list what's missing, most useful first: e.g. "paste Terapeak for X (have 3 sales,
+need ≥10 over 12 months)", "add 3–5 Xianyu prices", "all five pass → send the seller checklist and
+do a 1–3 unit test buy". Ticking "new devices" shows an ElektroG warning.
+
+**Known limits**
+- The paste parser was written without a real Terapeak sample. If your paste reads wrong, send me
+  one and I'll adapt it.
+- USD/GBP prices are converted at the rough rates in `config.yaml → research.fx_to_eur`.
+- Xianyu prices are asking prices, not sold prices, so expect to pay a little less.
+
 ## Phase 2: seller messages, arrival check and seller scorecard
 
 ```bash

@@ -26,3 +26,45 @@ CREATE TABLE IF NOT EXISTS seller_notes (
     notes    TEXT,
     updated  TEXT
 );
+
+-- Phase 4: category research (yours; never dropped)
+CREATE TABLE IF NOT EXISTS candidates (
+    id            TEXT PRIMARY KEY,   -- slug, e.g. "vita-oled"
+    name          TEXT NOT NULL,
+    calc_category TEXT,               -- cost profile to use (e.g. N3DS, iPod); null = new category defaults
+    own_sales_match TEXT,             -- regex on your Sales Sheet item names to include your own sales as evidence
+    status        TEXT,               -- idea | researching | test_buy | active | dropped
+    discontinued  TEXT,               -- e.g. "2013 (OLED model); line ended 2019"; empty = unknown
+    china_edge    TEXT,               -- modded | refurbished | arbitrage | none
+    testability   TEXT,               -- easy | medium | hard
+    hype          INTEGER DEFAULT 0,  -- 1 = you consider it hype-driven
+    new_devices   INTEGER DEFAULT 0,  -- 1 = you'd import NEW electrical devices (ElektroG)
+    weight_kg     REAL,
+    keywords_zh   TEXT,               -- Xianyu search terms
+    keywords_eu   TEXT,               -- eBay/Terapeak search terms
+    notes         TEXT,
+    updated       TEXT
+);
+
+CREATE TABLE IF NOT EXISTS findings (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    candidate  TEXT NOT NULL,
+    criterion  INTEGER NOT NULL,     -- 1..5 (your five criteria), 0 = general
+    text       TEXT NOT NULL,
+    source     TEXT,                 -- URL or "own experience"
+    added      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS evidence (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    candidate  TEXT NOT NULL,
+    kind       TEXT NOT NULL,        -- eu_sold | eu_asking | cn_asking | cn_sold
+    source     TEXT,                 -- terapeak | ebay_sold | pricecharting | kleinanzeigen | xianyu | manual
+    date       TEXT,                 -- sale/observation date
+    price      REAL NOT NULL,        -- in `currency`
+    currency   TEXT NOT NULL,        -- EUR | USD | GBP | CNY
+    title      TEXT,
+    condition  TEXT,
+    url        TEXT,
+    added      TEXT
+);

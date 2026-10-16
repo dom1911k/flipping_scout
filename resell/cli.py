@@ -331,3 +331,86 @@ def espanso(config: Path = ConfigOpt):
     from . import replies as R
 
     typer.echo(R.espanso_yaml(load_config(config)))
+
+
+# ----------------------------------------------------------------------------- Phase 4: research
+
+@app.command()
+def research(candidate: str = typer.Argument(None, help="Candidate id for details; empty = compare all"),
+             config: Path = ConfigOpt):
+    """Compare candidate categories on your five criteria (or show one in detail)."""
+    from . import research as RS
+
+    cfg = load_config(config)
+    if RS.load(cfg)[0].empty:
+        typer.echo(f"seeded {RS.seed(cfg)} candidates")
+    rows = RS.assess_all(cfg)
+    if candidate:
+        a = next((x for x in rows if x.cand["id"] == candidate), None)
+        if not a:
+            raise typer.BadParameter(f"unknown candidate - known: {', '.join(x.cand['id'] for x in rows)}")
+        typer.echo(f"\n{a.cand['name']}  ==> {a.verdict}: {a.verdict_reason}\n")
+        for i, c in enumerate(a.criteria, 1):
+            typer.echo(f"  {c['status']:<10} {c['name'][3:]}: {c['reason']}")
+            for f in a.findings.get(i, []):
+                typer.echo(f"             • {f['text']}" + (f"  [{f['source']}]" if f.get("source") else ""))
+        for f in a.findings.get(0, []):
+            typer.echo(f"  • {f['text']}")
+        if a.estimate:
+            r = a.estimate
+            typer.echo(f"\n  At median prices: buy ¥{r.inputs.rmb:.0f} → landed €{r.landed.total:.0f}, sell €{r.selling.price:.0f}"
+                       f" → €{r.profit:.0f} profit ({r.profit_on_cost:.0%} on cost); pay at most ¥{a.max_rmb or 0:.0f}")
+        for w in a.warnings:
+            typer.secho(f"  ⚠ {w}", fg="yellow")
+        for s in a.next_steps:
+            typer.secho(f"  → {s}", fg="cyan")
+        typer.echo("")
+        return
+    typer.echo(f"\n{'Candidate':<44}{'Verdict':<12}{'1 2 3 4 5':<11}{'EU med':>8}{'CN med':>8}{'Profit':>8}  Next step")
+    for a in rows:
+        marks = " ".join({"PASS": "✓", "FAIL": "✗", "BORDERLINE": "~"}.get(c["status"], "?") for c in a.criteria)
+        prof = (f"€{a.estimate.profit:.0f}" if a.estimate else f"€{a.own['profit']:.0f}*" if a.own else "-")
+        typer.echo(f"{a.cand['name'][:43]:<44}{a.verdict:<12}{marks:<11}"
+                   f"{('€%.0f' % a.eu_median) if a.eu_median else '-':>8}{('¥%.0f' % a.cn_median_rmb) if a.cn_median_rmb else '-':>8}"
+                   f"{prof:>8}  {(a.next_steps[0] if a.next_steps else '')[:70]}")
+    typer.echo("\n✓ pass  ~ borderline  ✗ fail  ? unknown   * = from your own sales.  Details: resell research <id>\n")
+
+
+@app.command("research-add")
+def research_add(name: str, config: Path = ConfigOpt):
+    """Add a new candidate category."""
+    from . import research as RS
+
+    typer.echo(f"added: {RS.add_candidate(load_config(config), name)}")
+
+
+@app.command("research-paste")
+def research_paste(candidate: str, source: str = typer.Option("terapeak", help="terapeak | ebay_sold | pricecharting | manual"),
+                   dry_run: bool = typer.Option(False, "--dry-run", help="Only show what was read"),
+                   config: Path = ConfigOpt):
+    """Read EU sold prices from stdin (copy-paste of Terapeak / eBay sold results)."""
+    import sys
+
+    from . import research as RS
+
+    pts = RS.parse_sold_paste(sys.stdin.read())
+    for p in pts[:15]:
+        typer.echo(f"  {p.date or '-':<11} {p.currency} {p.price:>8.2f}  {(p.title or '')[:60]}")
+    if len(pts) > 15:
+        typer.echo(f"  ... {len(pts) - 15} more")
+    if not pts:
+        typer.echo("no prices found (they need a currency: €, EUR, $, £)")
+    elif not dry_run:
+        typer.echo(f"saved {RS.add_evidence(load_config(config), candidate, 'eu_sold', pts, source)} prices")
+
+
+@app.command("research-cn")
+def research_cn(candidate: str, text: str = typer.Argument(..., help="Xianyu share text or a price"), config: Path = ConfigOpt):
+    """Add a Xianyu asking price (share text, '¥680 title', or just 680)."""
+    from . import research as RS
+
+    p = RS.parse_cn_text(text)
+    if not p:
+        raise typer.BadParameter("no price found")
+    RS.add_evidence(load_config(config), candidate, "cn_asking", [p], "xianyu")
+    typer.echo(f"added ¥{p.price:.0f} {p.title or ''}")
