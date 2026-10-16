@@ -79,10 +79,11 @@ def _save(fig, out: Path, name: str) -> str:
 # ----------------------------------------------------------------------------- analysis
 
 def summarise(g: pd.DataFrame) -> dict:
-    sold = g[g.is_stock == 0]
-    paid, rev, prof = sold.price_paid.sum(), sold.price_sold.sum(), sold.profit_recalc.sum()
+    closed = g[g.is_stock == 0]                 # sold + lost: both count in profit
+    sold = closed[closed.lost == 0]             # real sales: prices, days, flaws
+    paid, rev, prof = closed.price_paid.sum(), closed.price_sold.sum(), closed.profit_recalc.sum()
     return {
-        "sold": len(sold), "stock": int((g.is_stock == 1).sum()),
+        "sold": len(sold), "stock": int((g.is_stock == 1).sum()), "lost": int(g.lost.sum()),
         "revenue": rev, "profit": prof,
         "avg_buy": sold.price_paid.mean(), "avg_sell": sold.price_sold.mean(), "avg_profit": sold.profit_recalc.mean(),
         "profit_on_cost": prof / paid if paid else np.nan,
@@ -107,7 +108,7 @@ def build_report(sales: pd.DataFrame, purchases: pd.DataFrame, issues: pd.DataFr
     # bulk sales: >= 4 units of one category sold on the same day on the same platform
     key = [s.sell_date, s.platform, s.category]
     s["bulk"] = (s.is_stock == 0) & (s.groupby(key).item.transform("size") >= 4)
-    sold = s[s.is_stock == 0]
+    sold = s[(s.is_stock == 0) & (s.lost == 0)]
     ctx: dict = {"findings": (out / "findings.md").exists(), "as_of": as_of.date(), "generated": date.today(), "workbook": cfg.paths.workbook}
 
     # ---- 1. check stated numbers
@@ -133,6 +134,8 @@ def build_report(sales: pd.DataFrame, purchases: pd.DataFrame, issues: pd.DataFr
     ]
     ctx["check"] = md_table(pd.DataFrame([(a, f(b), f(c)) for a, b, c, f in check],
                                          columns=["Metric", "Your number", "From the sheet"]))
+    ctx["lost"] = s[s.lost == 1]
+    ctx["lost_loss"] = -s[s.lost == 1].profit_recalc.sum()
     ctx["tot"] = {k: (eur(v) if k in ("revenue", "profit") else v) for k, v in tot.items()}
     ctx["n3"], ctx["ip"] = n3, ip
     ctx["fmt"] = {"eur": eur, "pct": pct, "num": num}
@@ -141,7 +144,7 @@ def build_report(sales: pd.DataFrame, purchases: pd.DataFrame, issues: pd.DataFr
     rows = []
     for cat, g in s.groupby("category"):
         m = summarise(g)
-        rows.append({"Category": cat, "Sold": m["sold"], "Stock": m["stock"], "Revenue": m["revenue"],
+        rows.append({"Category": cat, "Sold": m["sold"], "Stock": m["stock"], "Lost": m["lost"], "Revenue": m["revenue"],
                      "Profit": m["profit"], "Avg profit": m["avg_profit"], "Profit on cost": m["profit_on_cost"],
                      "Margin": m["margin"], "Median days": m["median_days"], "Flaw rate": m["flaw_rate"],
                      "Major flaws": m["major_flaw_rate"]})
@@ -340,7 +343,7 @@ def build_report(sales: pd.DataFrame, purchases: pd.DataFrame, issues: pd.DataFr
     ctx["stock_n"] = len(stock)
     ctx["stock_old_n"] = int((stock.age > cfg.stock_aging_days).sum())
     ctx["stock"] = md_table(stock.assign(buy_date=stock.buy_date.dt.date, price_paid=stock.price_paid.map(eur),
-                                         flag=np.where(stock.age > cfg.stock_aging_days, "⚠ old", ""))[
+                                         flag=np.where(stock.age > cfg.stock_aging_days, "slow", ""))[
         ["sheet_row", "item", "category", "buy_date", "age", "price_paid", "flag", "comment"]].fillna("")
         .rename(columns={"sheet_row": "Row", "item": "Item", "category": "Category", "buy_date": "Bought",
                          "age": "Days", "price_paid": "Paid", "flag": "", "comment": "Comment"}), "rlllrrll")
@@ -371,7 +374,7 @@ def build_report(sales: pd.DataFrame, purchases: pd.DataFrame, issues: pd.DataFr
     for r in s.itertuples():
         if r.profit is not None and not pd.isna(r.profit) and not pd.isna(r.profit_recalc) and abs(r.profit - r.profit_recalc) > 0.5:
             inc.append((r.sheet_row, r.item, f"Profit {eur(r.profit, 2)} ≠ sold − paid {eur(r.profit_recalc, 2)}"))
-        if r.is_stock == 0 and r.price_sold == 0:
+        if r.is_stock == 0 and r.price_sold == 0 and not r.lost:
             inc.append((r.sheet_row, r.item, "Price Sold is 0 with a selling date (lost / refunded / given away?)"))
         if r.is_stock == 0 and pd.isna(r.price_sold):
             inc.append((r.sheet_row, r.item, "Selling date but no price sold"))
@@ -379,6 +382,8 @@ def build_report(sales: pd.DataFrame, purchases: pd.DataFrame, issues: pd.DataFr
             inc.append((r.sheet_row, r.item, "Price sold but no selling date"))
         if pd.notna(r.sell_date) and pd.notna(r.buy_date) and r.sell_date < r.buy_date:
             inc.append((r.sheet_row, r.item, "Sold before it was bought"))
+        if r.lost:
+            continue
         if r.is_stock == 0 and pd.isna(r.profitability) and pd.notna(r.price_sold):
             inc.append((r.sheet_row, r.item, "Profitability cell empty"))
         elif (r.is_stock == 0 and pd.notna(r.profitability) and r.price_paid
@@ -416,6 +421,7 @@ def build_report(sales: pd.DataFrame, purchases: pd.DataFrame, issues: pd.DataFr
     ctx["keywords"] = cfg.flaw_keywords
     ctx["minor_words"] = cfg.flaw_minor_words
     ctx["minor_followups"] = cfg.flaw_minor_followups
+    ctx["always_major"] = cfg.flaw_always_major
     ctx["negations"] = cfg.flaw_negations
     fl = s[s.flawed == 1]
     ctx["flagged"] = md_table(fl.assign(minor=np.where(fl.flaw_minor == 1, "minor", "major"))[

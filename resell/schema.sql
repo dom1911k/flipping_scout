@@ -29,7 +29,8 @@ CREATE TABLE IF NOT EXISTS sales (
     seller_confidence TEXT,                 -- explicit | link | fingerprint | inferred | unknown
     listing_id       TEXT,                  -- Goofish/Taobao item id if the source is a link
     days_to_sell     INTEGER,
-    is_stock         INTEGER
+    is_stock         INTEGER,
+    lost             INTEGER                -- lost in transit: a loss, but not a sale
 );
 
 CREATE TABLE IF NOT EXISTS purchases (

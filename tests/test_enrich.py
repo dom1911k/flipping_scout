@@ -42,8 +42,11 @@ def test_grade(name, grade):
 def test_flaws_major_and_minor():
     groups, words, minor = enrich.detect_flaws("Slightly yellow right side + dust under top screen", CFG)
     assert groups == ["yellow", "dust_debris"] and not minor
-    groups, _, minor = enrich.detect_flaws("Yellow corners (not too bad - wont mention)", CFG)
-    assert groups == ["yellow"] and minor
+    groups, _, minor = enrich.detect_flaws("Scratches on screen (not too bad - wont mention)", CFG)
+    assert groups == ["scratch"] and minor
+    # yellow and dust are always real flaws, however mildly worded
+    assert enrich.detect_flaws("Yellow corners (not too bad - wont mention)", CFG)[2] is False
+    assert enrich.detect_flaws("tiny spider thing", CFG)[2] is False
     assert enrich.detect_flaws("Had to take my own sd card (10€ added)", CFG)[0] == []
     assert enrich.detect_flaws("Immaculate (can be sold super pricey)", CFG)[0] == []
 

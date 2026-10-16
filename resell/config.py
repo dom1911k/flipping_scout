@@ -34,6 +34,8 @@ class Config(BaseModel):
     flaw_minor_followups: list[str] = Field(default_factory=list)
     flaw_negations: list[str] = Field(default_factory=list)
     flaw_overrides: dict[int, bool] = Field(default_factory=dict)
+    flaw_always_major: list[str] = Field(default_factory=list)
+    lost_rows: list[int] = Field(default_factory=list)
     main_seller: str | None = None
     dif_seller_markers: list[str] = Field(default_factory=list)
     non_seller_sources: list[str] = Field(default_factory=list)

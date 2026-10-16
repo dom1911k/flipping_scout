@@ -53,11 +53,17 @@ flaw_keywords:
 flaw_minor_words: [slight, slightly, tiny, small, maybe, "a little", minor, "just scatches on foil"]
 # Remarks that also count when they follow in the next clause: "Yellow corners (not too bad - wont mention)"
 flaw_minor_followups: ["not too bad", "wont mention", "might mention", "only on foil"]
+# Flaw groups that are never downgraded to "minor", however the comment is worded.
+flaw_always_major: [yellow, dust_debris]
 # Comments that mention a keyword but are not arrival flaws.
 flaw_negations: ["no dust", "kein staub", "no scratches", "keine kratzer",
                  "no screen protector", "immaculate"]
 # Manual corrections after you review the report: sheet row number -> true/false
 flaw_overrides: {}
+
+# Units that were lost in transit / never arrived (sheet rows). Counted as a loss in totals,
+# left out of sell-price, days-to-sell and flaw statistics.
+lost_rows: [173, 174]
 
 # Seller resolution. The Source column holds shop names (2024-25), then Goofish
 # links or listing titles. "dif seller" in the item name means "not my main seller".

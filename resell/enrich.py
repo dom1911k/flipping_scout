@@ -74,6 +74,8 @@ def detect_flaws(text: str, cfg: Config) -> tuple[list[str], list[str], bool]:
             near = " ".join(clauses[i:i + 2])
             minors.append(any(w in clause for w in cfg.flaw_minor_words)
                           or any(w in near for w in cfg.flaw_minor_followups))
+    if set(groups) & set(cfg.flaw_always_major):
+        return groups, words, False
     return groups, words, bool(minors) and all(minors)
 
 
@@ -132,6 +134,8 @@ def enrich_sales(sales: pd.DataFrame, cfg: Config) -> pd.DataFrame:
     df["platform"] = place.map(lambda p: cfg.platforms.get(p, {}).get("platform") or (p or None))
     df["account"] = place.map(lambda p: cfg.platforms.get(p, {}).get("account"))
     df["is_stock"] = (df["price_sold"].isna() & df["sell_date"].isna()).astype(int)
+    df["lost"] = df["sheet_row"].isin(cfg.lost_rows).astype(int)
+    df.loc[df["lost"] == 1, ["flawed", "flaw_minor"]] = 0
     bd = pd.to_datetime(df["buy_date"])
     sd = pd.to_datetime(df["sell_date"])
     df["days_to_sell"] = (sd - bd).dt.days.astype("Int64")

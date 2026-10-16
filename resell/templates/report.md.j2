@@ -13,7 +13,14 @@ see §9 for the word list and every row it flagged.
 
 {{ check }}
 
+{% if lost|length %}
+Lost in transit (config `lost_rows`): {{ lost|length }} units, {{ eur(lost_loss) }} written off, rows
+{{ lost.sheet_row.tolist()|join(", ") }}. They count in revenue/profit but not as sales.
+{% endif %}
+
 ## 2. Per category
+
+Profit and profit on cost include lost units. Sold, prices, days and flaw rates exclude them.
 
 {{ categories }}
 
@@ -144,6 +151,7 @@ The keyword lists are in `config.yaml` → `flaw_keywords`. To correct a single 
 {% for group, words in keywords.items() %}
 - **{{ group }}**: {{ words | join(", ") }}
 {% endfor %}
+- *never minor*: {{ always_major | join(", ") }} (a yellow screen or dust under the glass is always a real flaw)
 - *minor if the same clause contains*: {{ minor_words | join(", ") }}
 - *also minor if the same or next clause contains*: {{ minor_followups | join(", ") }}
 - *ignored phrases*: {{ negations | join(", ") }}
