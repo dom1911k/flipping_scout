@@ -1,0 +1,91 @@
+# Kleinanzeigen reply helper: intent keywords, scam patterns and reply snippets (German, du-form).
+# Written in the tone of your own replies: short, friendly, "Hey!" / "Hi Name,", "Viele Grüße".
+# Placeholders: {name} {price} {mode} {floor} {title} {area} {address} {paypal} {ship_cost} {alt_title}
+#               {time} {condition} {included} {tested} {answer} {sign}
+#               {it} = sie/ihn/es, {it_nom} = die/der/das (from the fact sheet's `article`)
+
+intents:
+  availability: ["noch da", "noch zu haben", "noch verfügbar", "noch erhältlich", "noch aktuell", "verfügbar?", "available", "still for sale", "ist es noch", "ist er noch", "ist sie noch", "gibt es noch"]
+  price: ["preis", "preislich", "preisvorschlag", "festpreis", "letzter preis", "letzte preis", "vb", "machbar", "nachlass", "rabatt", "günstiger", "billiger", "biete", "würde dir", "würde ihnen", "angebot", "was geht", "runter", "wären", "zahle", "für €", "€ bei", "euro", "price", "offer", "lowest", "discount"]
+  shipping: ["versand", "versenden", "verschicken", "schicken", "zusenden", "senden", "dhl", "hermes", "paket", "shipping", "ship"]
+  pickup: ["abholen", "abholung", "vorbeikommen", "vorbei kommen", "vor ort", "treffen", "anschauen", "ansehen", "wo in berlin", "wo wohnst", "adresse", "uhrzeit", " uhr", "heute", "morgen", "pick up", "pickup"]
+  payment: ["paypal", "bar ", "barzahlung", "bargeld", "überweisung", "sicher bezahlen", "freunde", "waren & dienst", "waren und dienst", "w&d", "f&f", "cash"]
+  specs: ["gemodded", "gemoddet", "modded", "homebrew", "luma", "cfw", "custom firmware", "speicher", "gb", "akku", "batterie", "mah", "laufzeit", "stunden", "region", "japan", "jp version", "sprache", "spiele", "games", "farbe", "farbton", "version", "ips", "tn", "bestellnummer", "seriennummer", "battery", "storage", "how long", "wie lange"]
+  condition: ["zustand", "mängel", "macken", "kratzer", "gebrauchsspuren", "optisch", "defekt", "funktioniert", "läuft", "scharniere", "scharnier", "pixel", "gelb", "staub", "condition", "scratches", "working", "works"]
+  included: ["dabei", "zubehör", "ladekabel", "ladegerät", "netzteil", "ovp", "verpackung", "karton", "lieferumfang", "included", "charger", "box"]
+  trade: ["tausch", "tauschen", "eintauschen", "gegen eine", "gegen meine", "trade", "swap"]
+
+# Words that mean the buyer wants pickup vs. shipping (for "bei Abholung" / "inkl. Versand").
+mode_words:
+  pickup: ["abholen", "abholung", "vorbeikommen", "vor ort", "bar", "barzahlung", "treffen", "persönlich"]
+  shipping: ["versand", "verschicken", "schicken", "zusenden", "inkl. versand", "inkl versand", "mit versand", "dhl", "hermes", "paket"]
+
+# Scam and risk patterns. severity: scam -> suggest a polite decline and don't share anything;
+# caution -> answer, but read the note.
+flags:
+  courier:
+    severity: scam
+    note: "Courier/'my driver picks it up' with payment arranged outside Kleinanzeigen is a classic scam."
+    patterns: ["kurier", "spedition", "mein fahrer", "lasse es abholen", "lass es abholen", "abholen lassen", "dhl mitarbeiter", "dhl-mitarbeiter", "umzugsfirma", "courier", "my driver", "transport company"]
+  link:
+    severity: scam
+    note: "Links in the chat are almost always fake 'Sicher bezahlen' / payment pages. Never click or enter data."
+    patterns: ["http://", "https://", "www.", "bit.ly", ".link", "klick auf den link", "klicke auf den link", "link öffnen", "über den link", "click the link"]
+  off_platform:
+    severity: scam
+    note: "Moving the chat to WhatsApp, phone or email takes you outside Kleinanzeigen's protection."
+    patterns: ["whatsapp", "whats app", "handynummer", "telefonnummer", "deine nummer", "ihre nummer", "schreib mir an", "schreiben sie mir an", "e-mail adresse", "email adresse", "mail adresse", "telegram", "+49", "+44", "+1 "]
+  fake_payment:
+    severity: scam
+    note: "'Payment already sent / confirm here' messages are fake. Check your real PayPal/Kleinanzeigen app, never a link or email."
+    patterns: ["zahlung ist eingegangen", "zahlung wurde", "geld wurde überwiesen", "habe bereits bezahlt", "hab bereits bezahlt", "bestätigung erhalten", "bestätigen sie", "freischalten", "freischaltung", "versicherung bezahlen", "gebühr bezahlen", "payment confirmation", "already paid"]
+  abroad:
+    severity: scam
+    note: "Buyer abroad / for a relative / unusual payment route is a common overpayment scam pattern."
+    patterns: ["im ausland", "nach spanien", "nach frankreich", "nach england", "für meinen sohn", "für meine tochter", "western union", "moneygram", "overseas"]
+  paypal_friends:
+    severity: caution
+    note: "Buyer pays via PayPal Freunde: no protection for THEM. Your risk is a hacked or stolen account whose payment gets reversed. Fine for pickup with cash/PayPal in person; for shipping prefer 'Waren & Dienstleistungen' or 'Sicher bezahlen'."
+    patterns: ["paypal freunde", "freunde und familie", "freunde & familie", "freunde paypal", "paypal f&f", "f&f", "friends and family"]
+
+# Reply snippets. Each list is joined into one message.
+snippets:
+  greeting_named: "Hi {name},"
+  greeting: "Hey!"
+  greeting_short: "Hallo,"
+  closing: "Viele Grüße"
+  closing_signed: "Viele Grüße,\n{sign}"
+
+  available: "ja, ist noch zu haben."
+  sold: "{it_nom} ist leider schon weg."
+  sold_alternative: "{it_nom} ist leider schon weg, aber ich hab eine sehr ähnliche hier: {alt_title}. {alt_pitch}"
+
+  price_accept: "{price} passt für mich{mode}."
+  price_counter: "wäre bereit auf {price}{mode} zu gehen."
+  price_final: "{price}{mode} würde ich noch machen, aber das wäre wirklich das Letzte."
+  price_fixed: "Preis wäre Festpreis."
+  price_fixed_shipping: "Preis wäre Festpreis. Wäre aber bereit den Versand zu übernehmen."
+  price_lowball: "danke für das Angebot, aber das ist mir leider zu wenig. Für {price}{mode} könnte ich {it} dir geben."
+
+  pickup: "Abholung ist gerne möglich, ich wohne nahe {area}."
+  pickup_time: "{time} passt bei mir."
+  pickup_day: "{time} passt grundsätzlich, um wie viel Uhr würdest du kommen?"
+  pickup_ask_time: "Wann würde es dir zeitlich passen?"
+  pickup_address: "Adresse ist\n{address}"
+  shipping_included: "Versand ist im Preis mit drin."
+  shipping_cost: "Versand geht auch, kostet {ship_cost} € extra."
+  shipping_none: "Versand mache ich bei dem Artikel leider nicht, nur Abholung."
+
+  payment_pickup: "Bar oder PayPal bei Abholung ist beides kein Problem."
+  payment_shipping: "Bezahlung gerne über „Sicher bezahlen“ hier bei Kleinanzeigen oder PayPal Waren & Dienstleistungen."
+  payment_paypal_ok: "Können wir gerne so machen. Meine PayPal Adresse ist {paypal}."
+  payment_need_address: "Bräuchte dann bitte die Adresse, an die ich es senden soll."
+
+  condition: "{condition}"
+  tested: "Ich hab {it} vor dem Verkauf getestet: {tested}."
+  included: "Dabei ist: {included}."
+  trade: "danke für das Angebot, aber tauschen möchte ich lieber nicht."
+  unknown_answer: "[ANTWORT ERGÄNZEN]"
+
+  scam_decline: "danke für die Nachricht, aber so mache ich das leider nicht. Gerne Abholung oder Versand mit „Sicher bezahlen“ hier über Kleinanzeigen."
+  scam_stay_here: "Lass uns gerne hier im Chat bleiben."

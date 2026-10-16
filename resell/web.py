@@ -13,6 +13,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 from . import calc
 from . import inspection as insp
+from . import replies as rep
 from .config import load_config
 
 env = Environment(loader=PackageLoader("resell", "templates"), autoescape=select_autoescape(["html"]))
@@ -175,6 +176,34 @@ def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
         form = dict(await request.form())
         insp.set_seller_note(cfg(), form["seller"], form.get("status") or None, form.get("notes", ""))
         return RedirectResponse("/sellers" + (f"?{form['back']}" if form.get("back") else ""), status_code=303)
+
+    # ------------------------------------------------------------------ Phase 3: replies
+
+    def reply_page(request: Request, form: dict, r=None, error=None):
+        c = cfg()
+        listings, ex = rep.factsheets(c)
+        ctx = {"active": "/reply", "listings": listings, "form": form, "r": r, "error": error,
+               "llm_ok": rep.llm_available(), "using_examples": ex or rep.profile(c)[1]}
+        partial = request.headers.get("HX-Request") == "true"
+        return HTMLResponse(env.get_template("_reply.html" if partial else "reply.html").render(**ctx))
+
+    @app.get("/reply", response_class=HTMLResponse)
+    def reply_get(request: Request):
+        return reply_page(request, {})
+
+    @app.post("/reply", response_class=HTMLResponse)
+    async def reply_post(request: Request):
+        form = dict(await request.form())
+        text = (form.get("message") or "").strip()
+        if not text:
+            return reply_page(request, form)
+        try:
+            r = rep.reply(cfg(), form.get("listing", ""), text, my_last=_num(form.get("last")),
+                          mode=form.get("mode") or None, name=(form.get("name") or "").strip() or None,
+                          use_llm=bool(form.get("llm")))
+        except ValueError as e:
+            return reply_page(request, form, error=str(e))
+        return reply_page(request, form, r=r)
 
     @app.post("/go", response_class=HTMLResponse)
     async def go(request: Request):

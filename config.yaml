@@ -147,3 +147,16 @@ category_profiles:
   DDR5:      {weight_kg: 0.15, returns_reserve_pct: 0.03, discontinued: false, hype: true, china_edge: arbitrage, testability: medium}
   AYN:       {weight_kg: 0.80, returns_reserve_pct: 0.03, discontinued: false, hype: true, china_edge: arbitrage, testability: easy}
   GB/GBA:    {weight_kg: 0.25, returns_reserve_pct: 0.05, discontinued: true, china_edge: modded, testability: easy}
+
+# ---------------------------------------------------------------- Phase 3: Kleinanzeigen reply helper
+replies:
+  factsheets: data/factsheets.yaml       # your listings (gitignored); `resell replies-init` copies the example
+  profile: data/seller_profile.yaml      # name, area, pickup address, PayPal (gitignored)
+  use_llm: true                          # only if ANTHROPIC_API_KEY is set; otherwise templates
+  llm_model: claude-opus-5-5
+  llm_effort: low
+  negotiation:
+    round_to: 5              # counters land on 5s: 280, 285 ...
+    first_step_pct: 0.07     # "what's your best price?" -> asking minus ~7% (300 -> 280)
+    accept_within: 5         # accept an offer if a fair counter would be within €5 of it
+    lowball_pct: 0.80        # below 80% of the floor = lowball: polite no + your floor

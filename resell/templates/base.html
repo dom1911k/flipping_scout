@@ -96,7 +96,7 @@ nav a.on { color: var(--ink); border-color: var(--accent); font-weight: 600; }
 <body>
 <main>
   <nav>
-    {% for href, label in [("/", "Calculator"), ("/messages", "Seller messages"), ("/inspect", "Arrival check"), ("/sellers", "Sellers")] %}
+    {% for href, label in [("/", "Calculator"), ("/reply", "Replies"), ("/messages", "Seller messages"), ("/inspect", "Arrival check"), ("/sellers", "Sellers")] %}
     <a href="{{ href }}" class="{{ 'on' if active == href else '' }}">{{ label }}</a>{% endfor %}
   </nav>
   {% block content %}{% endblock %}

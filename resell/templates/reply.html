@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Reply Helper{% endblock %}
+{% block content %}
+<h1>Reply helper</h1>
+<div class="sub">Paste the buyer's message → draft in your tone → copy. Prices come from your fact sheet and never go below the floor.
+  {% if using_examples %}<b>Using example fact sheets</b> - run <code>resell replies-init</code> and edit <code>data/factsheets.yaml</code>.{% endif %}</div>
+<div class="grid">
+  <form method="post" action="/reply" hx-post="/reply" hx-target="#result"
+        hx-trigger="submit, change from:select, input[!document.getElementById('llm')?.checked] delay:500ms from:#msg">
+    <div class="field"><label for="listing">Listing</label>
+      <select id="listing" name="listing">
+        {% for k, l in listings.items() %}<option value="{{ k }}" {% if form.listing == k %}selected{% endif %}>{{ l.title }} · €{{ l.price }}</option>{% endfor %}
+      </select></div>
+    <div class="field"><label for="msg">Buyer's message</label>
+      <textarea id="msg" name="message" rows="7" style="width:100%;font:inherit;padding:8px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px" placeholder="Hallo, ist der noch zu haben? Was wäre dein letzter Preis bei Abholung?" autofocus>{{ form.message or '' }}</textarea></div>
+    <div class="row">
+      <div class="field"><label for="last">Your last counter €</label>
+        <input id="last" name="last" inputmode="decimal" placeholder="optional" value="{{ form.last or '' }}"></div>
+      <div class="field"><label for="mode">Pickup / shipping</label>
+        <select id="mode" name="mode">
+          {% for v, l in [("", "Detect"), ("pickup", "Pickup"), ("shipping", "Shipping")] %}<option value="{{ v }}" {% if (form.mode or "") == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <div class="field"><label for="name">Buyer's name</label>
+      <input id="name" name="name" placeholder="detected from their sign-off" value="{{ form.name or '' }}"></div>
+    <label style="display:flex;gap:8px;align-items:center;font-size:14px;margin:4px 0 12px">
+      <input type="checkbox" id="llm" name="llm" value="1" {% if not llm_ok %}disabled{% elif form.llm %}checked{% endif %}>
+      Word it with Claude {% if not llm_ok %}<span class="hint">(set ANTHROPIC_API_KEY and install <code>.[llm]</code>)</span>{% endif %}
+    </label>
+    <button type="submit">Draft reply</button>
+  </form>
+  <section id="result">{% include "_reply.html" %}</section>
+</div>
+{% endblock %}

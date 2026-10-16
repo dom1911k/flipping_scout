@@ -1,0 +1,25 @@
+{% if error %}<div class="error">{{ error }}</div>
+{% elif r %}
+<div class="card">
+  {% for fl in r.analysis.flags %}
+  <div class="{{ 'error' if fl.severity == 'scam' else 'warn-msg' }}" style="margin-bottom:8px">
+    {{ '⛔ Scam pattern' if fl.severity == 'scam' else '⚠ Careful' }} ({{ fl.key.replace('_', ' ') }}): {{ fl.note }}</div>
+  {% endfor %}
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+    {% for i in r.analysis.intents %}<span class="verdict UNKNOWN" style="font-weight:600">{{ i }}</span>{% endfor %}
+    {% if r.analysis.offer %}<span class="verdict PASS">offer €{{ "%.0f"|format(r.analysis.offer) }}</span>{% endif %}
+    {% if r.analysis.mode %}<span class="verdict PASS">{{ r.analysis.mode }}</span>{% endif %}
+    {% if r.analysis.time %}<span class="verdict PASS">{{ r.analysis.time }}</span>{% endif %}
+  </div>
+  {% if r.decision.action != "none" %}
+  <div class="hint" style="margin-bottom:8px">Price: <b>{{ r.decision.action }}{% if r.decision.price %} €{{ "%.0f"|format(r.decision.price) }}{% endif %}</b> - {{ r.decision.reason }}</div>
+  {% endif %}
+  <div style="display:flex;justify-content:space-between;align-items:center"><b>Draft</b>
+    <button class="copy" data-copy="draft" type="button">Copy</button></div>
+  <div class="zh" id="draft" contenteditable="true" style="font-size:15px">{{ r.draft }}</div>
+  {% for t in r.todo %}{% if not t.split(':')[0] in r.analysis.flags|map(attribute='key')|list %}<div class="hint">→ {{ t }}</div>{% endif %}{% endfor %}
+  <div class="hint" style="margin-top:8px">{{ r.source }} · you can edit the draft before copying</div>
+</div>
+{% else %}
+<div class="card hint">Paste a message on the left. The draft updates as you type (unless “Word it with Claude” is on - then press the button).</div>
+{% endif %}

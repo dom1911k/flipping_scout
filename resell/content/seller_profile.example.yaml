@@ -1,0 +1,7 @@
+# Copy to data/seller_profile.yaml (gitignored) with `resell replies-init` and fill in.
+# Only used when a reply needs it (address after a pickup time is agreed, PayPal when the buyer
+# chooses PayPal Waren & Dienstleistungen). Never committed.
+sign: "Dein Name"                # used in "Viele Grüße,\n<sign>" when you greet the buyer by name
+area: "Rosenthaler Platz"        # shown before the full address: "ich wohne nahe ..."
+address: "Straße Nr\nPLZ Berlin\nBei \"Name\" klingeln"
+paypal: "deine-paypal@adresse.de"

@@ -277,3 +277,57 @@ def seller_note(seller: str, status: str = typer.Option(None, help="preferred | 
 
     I.set_seller_note(load_config(config), seller, status, note)
     typer.echo(f"saved: {seller}")
+
+
+# ----------------------------------------------------------------------------- Phase 3
+
+@app.command("reply")
+def reply_cmd(
+    message: str = typer.Argument("-", help="Buyer message ('-' = read from stdin)"),
+    listing: str = typer.Option(..., "--listing", "-l", help="Fact sheet id, e.g. n3ds-dual-ips"),
+    last: float = typer.Option(None, "--last", help="Your last counter-offer in this chat, EUR"),
+    mode: str = typer.Option(None, "--mode", help="pickup | shipping (default: detected)"),
+    name: str = typer.Option(None, "--name", help="Buyer's name (default: from their sign-off)"),
+    llm: bool = typer.Option(None, "--llm/--no-llm", help="Word it with Claude (needs ANTHROPIC_API_KEY)"),
+    config: Path = ConfigOpt,
+):
+    """Draft a Kleinanzeigen reply in your tone."""
+    import sys
+
+    from . import replies as R
+
+    text = sys.stdin.read() if message == "-" else message
+    r = R.reply(load_config(config), listing, text, my_last=last, mode=mode, name=name, use_llm=llm)
+    a, d = r.analysis, r.decision
+    typer.echo(f"\nintents: {', '.join(a.intents)}" + (f" · offer €{a.offer:.0f}" if a.offer else "")
+               + (f" · {a.mode}" if a.mode else "") + (f" · time: {a.time}" if a.time else ""))
+    if d.action != "none":
+        typer.echo(f"price: {d.action} {('€%.0f' % d.price) if d.price else ''} ({d.reason})")
+    for fl in a.flags:
+        typer.secho(f"{'⛔' if fl['severity'] == 'scam' else '⚠'} {fl['key']}: {fl['note']}",
+                    fg="red" if fl["severity"] == "scam" else "yellow")
+    typer.echo(f"\n{r.draft}\n")
+    for t in r.todo:
+        if not any(t.startswith(fl["key"]) for fl in a.flags):
+            typer.secho(f"→ {t}", fg="cyan")
+    typer.echo(f"({r.source}{'; example fact sheets - run `resell replies-init`' if r.using_examples else ''})")
+
+
+@app.command("replies-init")
+def replies_init(config: Path = ConfigOpt):
+    """Copy the example fact sheets and seller profile to data/ (gitignored) for editing."""
+    from . import replies as R
+
+    made = R.init_local_files(load_config(config))
+    for p in made:
+        typer.echo(f"created {p} - edit it")
+    if not made:
+        typer.echo("data/factsheets.yaml and data/seller_profile.yaml already exist")
+
+
+@app.command()
+def espanso(config: Path = ConfigOpt):
+    """Print reply snippets as an Espanso match file (pipe into ~/.config/espanso/match/kleinanzeigen.yml)."""
+    from . import replies as R
+
+    typer.echo(R.espanso_yaml(load_config(config)))

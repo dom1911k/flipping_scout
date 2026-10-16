@@ -172,6 +172,65 @@ status and notes (preferred / ok / watch / avoid).
   Enter a serial or the buy date and price so the link works.
 - The checklist answer rate only counts inspections you record from now on. There is no history for it.
 
+## Phase 3: Kleinanzeigen reply helper
+
+```bash
+resell replies-init                 # copies example fact sheets + profile to data/ (gitignored) - edit them
+resell reply -l n3ds-dual-ips "Moin, am Preis ist nichts mehr machbar? Gruß Niclas"
+resell reply -l ipod-classic-512 --last 210 "Wären 190 € bei Abholung heute machbar?"
+pbpaste | resell reply -l n3ds-dual-ips -      # message from the clipboard
+resell espanso > ~/.config/espanso/match/kleinanzeigen.yml   # text-expander snippets (:ka-verf, :ka-preis, ...)
+resell serve                        # "Replies" page: paste -> draft -> copy
+```
+
+**Your files** (both gitignored, in `data/`):
+- `factsheets.yaml`: one entry per listing type.
+  - Asking price, `floor_pickup`, `floor_shipped`, shipping (offered / cost / included), `fixed_price`.
+  - Condition, what you tested, what's included, specs.
+  - `article` (die/der/das, so the grammar fits).
+  - `faq`: keyword → your own answer.
+  - `sold` + `alternative`, for "die ist leider weg, aber ich hab eine sehr ähnliche…".
+- `seller_profile.yaml`: your name for the sign-off, area, pickup address and PayPal address.
+  These are only put into a draft when the conversation calls for them: the address once a clock
+  time is agreed, PayPal when the buyer asks to pay with PayPal Waren & Dienstleistungen.
+
+**How a reply is built**
+1. **Intents** are detected by keyword (German and English, whole words): availability, price,
+   shipping, pickup, payment, specs, condition, included, trade.
+   It also extracts the buyer's offer (ignoring GB, mAh, times and dates), pickup vs. shipping,
+   a proposed time, and the buyer's name from their sign-off.
+2. **The price decision is rule-based** and lives in `config.yaml → replies.negotiation`.
+   - The first answer to "what's your best price?" is asking minus ~7%, rounded to 5 (300 → 280).
+   - An offer at or above your price is accepted.
+   - Otherwise you meet in the middle. An offer within €5 of that counter is accepted.
+   - An offer below the floor gets "X würde ich noch machen, aber das wäre wirklich das Letzte".
+   - Below 80% of the floor is a lowball: a polite no plus your floor.
+   - Fixed-price listings answer "Festpreis", and offer free shipping if you ship.
+   - **Nothing ever goes below the floor.** Pass `--last` (or fill "Your last counter") so it
+     knows where the haggling stands.
+3. **Scam and risk flags:**
+   - Hard flags, which get a polite decline and no personal details: courier pickup, links in the
+     chat, moving to WhatsApp/phone/email, fake "payment sent / confirm here" messages, and
+     buyers abroad or buying for a relative.
+   - Caution only: a buyer paying with *PayPal Freunde*. That's a risk for the buyer, not for you,
+     apart from a hacked account reversing the payment. Fine for pickup; for shipping prefer
+     Waren & Dienstleistungen or "Sicher bezahlen".
+4. **The draft** comes from snippets in your tone (`resell/content/replies.yaml`).
+   - Spec questions use your fact sheet's FAQ first. Anything it can't answer becomes
+     **[ANTWORT ERGÄNZEN]**, plus a note.
+   - **Optional:** with `ANTHROPIC_API_KEY` set and `pip install -e ".[llm]"`, tick "Word it with Claude".
+     Claude rewords the draft using your past replies (`resell/content/tone_examples.yaml`) as style
+     examples. It gets the price decision as a fixed rule.
+   - If its draft mentions any price the rules didn't allow, the template is used instead. The
+     same happens if it's too long, the API errors, or it declines.
+   - Scam messages never go to the LLM.
+
+**Known limits**
+- Keyword intents miss unusual phrasing. When nothing matches, it treats the message as an
+  availability question. Check the intent chips.
+- It doesn't know your calendar: a proposed time gets "passt bei mir" plus a note to check.
+- One message at a time. Earlier chat history only enters through "your last counter".
+
 ## Tests
 
 ```bash

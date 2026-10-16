@@ -1,0 +1,75 @@
+# Example fact sheets - copy to data/factsheets.yaml (gitignored) with `resell replies-init`, then edit.
+# One entry per listing type. Prices in EUR.
+#   price          asking price on Kleinanzeigen
+#   floor_pickup   lowest you accept on pickup (cash/PayPal in person)
+#   floor_shipped  lowest you accept including shipping (defaults to floor_pickup + shipping.cost)
+#   fixed_price    true = never haggle (you may still offer free shipping)
+#   article        die | der | das - how you'd refer to it ("die Konsole", "der iPod")
+#   faq            keyword -> answer, checked before the generic spec lines
+#   sold / alternative: if sold, offer another listing instead (like your "die ist leider weg, aber...")
+
+listings:
+  n3ds-dual-ips:
+    title: New 3DS XL mit dual IPS
+    article: die
+    category: N3DS
+    price: 300
+    floor_pickup: 260
+    floor_shipped: 270
+    shipping: {offered: true, cost: 6, included: true}
+    fixed_price: false
+    condition: "Optisch sehr guter Zustand, nur leichte Gebrauchsspuren am Gehäuse. Beide Bildschirme sind IPS, ohne Pixelfehler."
+    tested: ["beide Bildschirme", "3D", "Kameras", "WLAN", "alle Tasten", "Circle Pad und C-Stick", "Akku"]
+    included: ["Konsole", "64GB SD-Karte", "Ladekabel"]
+    facts:
+      Speicher: 64GB SD-Karte
+      Bildschirme: oben und unten IPS
+      Software: Luma (Custom Firmware), Spiele vorinstalliert
+      Region: japanisches Gerät, Systemsprache Englisch
+    faq:
+      - keywords: [gemodded, gemoddet, modded, homebrew, luma, cfw]
+        answer: "Der 3DS ist mit Luma gemodded."
+      - keywords: [spiele, games]
+        answer: "Genau, sind alle vorinstalliert und es können einfach mehr runtergeladen werden."
+      - keywords: [scharnier]
+        answer: "Die Scharniere sind fest und rasten gut ein."
+    sold: false
+    alternative: null
+
+  ipod-classic-512:
+    title: iPod Classic 7 - 512GB + 1800mAh Akku
+    article: der
+    category: iPod
+    price: 230
+    floor_pickup: 200
+    floor_shipped: 210
+    shipping: {offered: true, cost: 6, included: false}
+    fixed_price: false
+    condition: "Neues Gehäuse, Display ohne Kratzer."
+    tested: ["Speicher voll beschrieben", "beide Kopfhörerkanäle", "Click Wheel", "Akku"]
+    included: ["iPod", "USB-Kabel"]
+    facts:
+      Speicher: 512GB (SD-Adapter)
+      Akku: 1800 mAh
+    faq:
+      - keywords: [akku, batterie, mah, laufzeit, stunden, wie lange]
+        answer: "Hab den nie komplett durchlaufen lassen, aber es sind schon locker 20-30 Stunden Musik. Video vlt die Hälfte oder etwas weniger."
+    sold: false
+    alternative: null
+
+  ayn-thor:
+    title: AYN Thor Max 16GB + 1TB
+    article: die
+    category: AYN
+    price: 620
+    floor_pickup: 620
+    shipping: {offered: true, cost: 8, included: false}
+    fixed_price: true          # "Preis wäre Festpreis. Wäre aber bereit den Versand zu übernehmen."
+    condition: "Neu, nur zum Testen ausgepackt."
+    tested: ["Bildschirme", "Tasten", "Laden"]
+    included: ["Konsole", "Ladekabel", "OVP"]
+    faq:
+      - keywords: [rainbow, farbton, farbe]
+        answer: "Rainbow daher, weil die AB/XY Tasten regenbogenfarben sind, aber ja, die Konsole ist an sich komplett grau :)"
+    sold: false
+    alternative: null
