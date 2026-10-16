@@ -1,0 +1,100 @@
+# resell-toolkit configuration. Everything tunable lives here.
+
+paths:
+  workbook: data/Orders_and_cost_breakdown.xlsx   # read-only input
+  db: data/resell.db
+  reports: reports
+
+# ---------------------------------------------------------------- Phase 0
+sales_sheet: "Sales Sheet"
+order_sheet_prefix: "Order #"
+
+stock_aging_days: 120          # flag unsold stock older than this
+report_as_of: null             # null = today; or "2026-10-16"
+
+# Category rules: first match wins (case-insensitive regex on the item name).
+# Order matters: grips before N3DS ("Hori 3DS grip"), Vita cards before consoles.
+categories:
+  - {name: Grip,      pattern: '\bgrip\b'}
+  - {name: Vita card, pattern: '(vita|psv).*(card|sd|\b\d+\s*g)'}
+  - {name: N3DS,      pattern: 'n3ds|3ds\s*(ll|xl)|new\s*3ds'}
+  - {name: iPod,      pattern: 'ipod'}
+  - {name: Bluetooth, pattern: 'bluetooth|ugreen'}
+  - {name: Camera,    pattern: 'olympus|mju|camera|\bvf\d'}
+  - {name: DDR5,      pattern: 'ddr5'}
+  - {name: AYN,       pattern: '\bayn\b|\bthor\b|\bodin'}
+  - {name: GB/GBA,    pattern: '\bgb[acp]?\b|gameboy|game boy|\bgbasp\b|\bsp\b'}
+  - {name: Other,     pattern: '.'}
+
+# Grade = condition number sellers use ("white 98" = 98% new). Only 80-99 count.
+grade_min: 80
+grade_max: 99
+
+# Flaw detection on item name + comment. A row is "flawed" if any group matches
+# and no negation pattern covers that match. Groups are reported separately.
+flaw_keywords:
+  dust_debris: [dust, staub, hair, haar, spider, webs, krümel, flecken, particle,
+                smudge, "stuff under", "weird under", debris, "weird marks", "weird traces"]
+  yellow:      [yellow, gelb, tint, tinge]
+  scratch:     [scratch, scatch, kratzer, "screen glass"]
+  screen:      [pixel, "burn in", dim, "screen defect", "corners slightly black",
+                blackened, spotted, "upper panel is tn"]
+  shell_serial: [reshell, "fake serial", "serial code clearly fake", "sn mismatch",
+                 "code mismatch", "serial not matching", "rough outer shell",
+                 "shell pretty rough", "not fully closable", "opened it"]
+  function:    ["not working", "doesn't work", "not responding", defect, broken,
+                drift, "barely works", "only if pressed", "not as clicky", "weak wifi",
+                "power issues", "audio issues", "not turning on", "doesn't charge",
+                "quite slow", rigid, "difficult to turn", corrupted, "c stick is weird",
+                "weird b button", "weird noise", "smoke came out"]
+  odor:        [smoke stench, "smoke smell", stench, smell]
+  wrong_item:  ["instead of", scammed, "dual tn"]
+# Words in the same clause that mark a flaw as minor (sold at or near normal price).
+flaw_minor_words: [slight, slightly, tiny, small, maybe, "a little", minor, "just scatches on foil"]
+# Remarks that also count when they follow in the next clause: "Yellow corners (not too bad - wont mention)"
+flaw_minor_followups: ["not too bad", "wont mention", "might mention", "only on foil"]
+# Comments that mention a keyword but are not arrival flaws.
+flaw_negations: ["no dust", "kein staub", "no scratches", "keine kratzer",
+                 "no screen protector", "immaculate"]
+# Manual corrections after you review the report: sheet row number -> true/false
+flaw_overrides: {}
+
+# Seller resolution. The Source column holds shop names (2024-25), then Goofish
+# links or listing titles. "dif seller" in the item name means "not my main seller".
+main_seller: "任子隆批发零售折扣店"
+dif_seller_markers: ["dif seller", "different vendor", "different seller"]
+non_seller_sources: ["JP + CN Sources", "Random Xianyu Source", "Forgot", ""]
+# From this date on, N3DS rows without a "dif seller" marker and without other seller
+# evidence are attributed to main_seller (marked confidence = "inferred").
+dif_seller_convention_since: "2025-09-01"
+
+# Selling Place normalisation: value -> platform / account
+platforms:
+  "Kleinanzeigen": {platform: Kleinanzeigen}
+  "Ebay Dom":      {platform: eBay, account: Dom}
+  "Ebay Risa":     {platform: eBay, account: Risa}
+  "Ebay Laura":    {platform: eBay, account: Laura}
+  "Vinted Dom":    {platform: Vinted, account: Dom}
+  "Willhaben":     {platform: Willhaben}
+  "Privat":        {platform: Private}
+  "Discord":       {platform: Private}
+  "David":         {platform: Private}
+
+ebay_account_revenue_cap_eur: 2000   # per account per calendar year (your own rule)
+
+# ---------------------------------------------------------------- Phase 1 (placeholders, verified then)
+costs:
+  rmb_per_eur_effective: 7.9
+  agent_fee_per_item_eur: 0.5
+  import_vat_rate: 0.19
+  import_vat_enabled: true
+  outbound_shipping_eur: 6.0
+  shipping_share_eur:          # international shipping per item
+    N3DS: 9
+    iPod: 5
+    Vita card: 2
+    Bluetooth: 2
+  returns_reserve_pct:
+    N3DS: 0.05
+    iPod: 0.03
+  ebay_private_fees: null      # TODO Phase 1: look up current eBay.de private-seller fees

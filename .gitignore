@@ -1,0 +1,12 @@
+# personal data - never commit
+data/
+*.db
+*.sqlite
+*.xlsx
+.env
+reports/
+# python
+__pycache__/
+*.egg-info/
+.venv/
+.pytest_cache/
