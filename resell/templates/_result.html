@@ -1,0 +1,62 @@
+{% macro eur(v, d=2) %}€{{ ("{:,.%df}" % d).format(v) }}{% endmacro %}
+{% macro breakdown(r) %}
+<table>
+  <tr><td>Goods <span class="hint">¥{{ "{:,.0f}".format(r.inputs.rmb) }} at {{ "%.2f"|format(r.landed.rate) }} RMB/€</span></td><td class="n">{{ eur(r.landed.goods) }}</td></tr>
+  <tr><td>Agent fee</td><td class="n">{{ eur(r.landed.agent_fee) }}</td></tr>
+  <tr><td>International shipping</td><td class="n">{{ eur(r.landed.shipping) }}</td></tr>
+  <tr><td>Customs <span class="hint">{{ r.landed.duty_note }}</span></td><td class="n">{{ eur(r.landed.duty) }}</td></tr>
+  <tr><td>Import VAT <span class="hint">{% if r.landed.vat_on %}19% on goods + shipping + customs{% else %}off for this category{% endif %}</span></td><td class="n">{{ eur(r.landed.import_vat) }}</td></tr>
+  {% if r.landed.parts %}<tr><td>Parts</td><td class="n">{{ eur(r.landed.parts) }}</td></tr>{% endif %}
+  <tr class="total"><td>Landed cost</td><td class="n">{{ eur(r.landed.total) }}</td></tr>
+</table>
+<table>
+  <tr><td>Sell on {{ r.selling.platform|capitalize }} <span class="hint">{{ r.selling.price_source }}</span></td><td class="n">{{ eur(r.selling.price) }}</td></tr>
+  {% if r.selling.fee %}<tr><td>Platform fee</td><td class="n">−{{ eur(r.selling.fee) }}</td></tr>{% endif %}
+  {% if r.selling.outbound_shipping %}<tr><td>Shipping to buyer</td><td class="n">−{{ eur(r.selling.outbound_shipping) }}</td></tr>{% endif %}
+  {% if r.selling.returns_reserve %}<tr><td>Returns / defect reserve</td><td class="n">−{{ eur(r.selling.returns_reserve) }}</td></tr>{% endif %}
+  <tr><td>Landed cost</td><td class="n">−{{ eur(r.landed.total) }}</td></tr>
+  <tr class="total"><td>Profit</td><td class="n">{{ eur(r.profit) }}</td></tr>
+</table>
+{% endmacro %}
+{% macro history(h) %}
+{% if h.n %}
+<div class="stats">
+  <div class="stat"><b>{{ h.n }}</b><span>your sales ({{ h.window }})</span></div>
+  <div class="stat"><b>{{ eur(h.median_sell, 0) }}</b><span>median sold{% if h.median_sell_clean %} · clean {{ eur(h.median_sell_clean, 0) }}{% endif %}</span></div>
+  <div class="stat"><b>{{ h.median_days|int }} days</b><span>median to sell</span></div>
+  <div class="stat"><b>{{ (h.flaw_rate * 100)|round|int }}%</b><span>arrived flawed</span></div>
+</div>
+{% elif h.note %}<p class="hint">{{ h.note }}</p>{% endif %}
+{% endmacro %}
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% elif maxbuy %}
+<div class="card">
+  {% set r = maxbuy.at_max %}
+  {% if maxbuy.max_rmb > 0 %}
+  <div class="hint">Pay at most</div>
+  <div class="hero">¥{{ "{:,.0f}".format(maxbuy.max_rmb) }}<small>≈ {{ eur(r.landed.total, 0) }} landed</small></div>
+  <div class="hint">Selling at {{ eur(r.selling.price, 0) }} gives {{ eur(r.profit, 0) }} profit, {{ (r.profit_on_cost * 100)|round|int }}% on cost.
+    The limit is set by {{ maxbuy.binding }}.</div>
+  {% else %}
+  <div class="error">{{ maxbuy.binding }}</div>
+  {% endif %}
+  {{ history(r.history) }}
+  <details><summary>Cost breakdown at the max price</summary>{{ breakdown(r) }}</details>
+</div>
+{% elif result %}
+{% set r = result %}
+<div class="card">
+  <span class="verdict {{ r.verdict }}">{{ r.verdict }}</span>
+  <div class="hero">{{ eur(r.profit, 0) }}<small>profit · {{ (r.profit_on_cost * 100)|round|int }}% on cost · {{ (r.margin * 100)|round|int }}% margin</small></div>
+  <div class="hint">{{ r.verdict_reason }} · break-even sell price {{ eur(r.break_even_sell, 0) }}</div>
+  <ul class="crit">
+    {% for c in r.criteria %}<li><span class="verdict {{ c.status }}">{{ c.status }}</span><span><b>{{ c.name[3:] }}</b> — {{ c.reason }}</span></li>{% endfor %}
+  </ul>
+  {{ history(r.history) }}
+  {{ breakdown(r) }}
+</div>
+{% else %}
+<div class="card hint">Pick a category to see the most you should pay, or switch to “Check a listing” and enter its RMB price.</div>
+{% endif %}

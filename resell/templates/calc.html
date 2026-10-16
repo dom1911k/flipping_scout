@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buy Calculator</title>
+<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+<style>
+:root {
+  --bg: #fcfcfb; --panel: #ffffff; --ink: #0b0b0b; --ink2: #52514e; --muted: #8a8984; --line: #e4e3df;
+  --accent: #2a78d6; --pass: #1a7f37; --pass-bg: #e7f5ea; --warn: #8a5a00; --warn-bg: #fdf3dc;
+  --fail: #b42318; --fail-bg: #fdeceb;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1a1a19; --panel: #222221; --ink: #f0efec; --ink2: #c3c2b7; --muted: #8f8e88; --line: #3a3a38;
+    --accent: #3987e5; --pass: #6fcf8a; --pass-bg: #1f3325; --warn: #f0c060; --warn-bg: #3a3020;
+    --fail: #f2837a; --fail-bg: #3d2322; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 20px 16px 48px; }
+h1 { font-size: 18px; margin: 0 0 4px; }
+.sub { color: var(--ink2); font-size: 13px; margin-bottom: 16px; overflow-wrap: anywhere; }
+.grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start; }
+.grid > * { min-width: 0; }
+@media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+form, .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.modes { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 3px; margin-bottom: 14px; }
+.modes label { flex: 1; text-align: center; padding: 6px; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--ink2); }
+.modes input { display: none; }
+.modes input:checked + span { color: var(--ink); font-weight: 600; }
+.modes label:has(input:checked) { background: var(--panel); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 12px; color: var(--ink2); margin-bottom: 3px; }
+.field input, .field select { width: 100%; padding: 7px 9px; font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 6px; }
+.field input:focus, .field select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.only-calc { display: none; }
+form:has(input[value=calc]:checked) .only-calc { display: block; }
+form:has(input[value=calc]:checked) .only-max { display: none; }
+details summary { cursor: pointer; font-size: 13px; color: var(--ink2); margin: 6px 0 10px; }
+button { width: 100%; padding: 9px; font: inherit; font-weight: 600; color: #fff; background: var(--accent); border: 0; border-radius: 6px; cursor: pointer; }
+.hint { font-size: 12px; color: var(--muted); }
+.hero { font-size: 40px; font-weight: 700; letter-spacing: -0.5px; margin: 2px 0; }
+.hero small { font-size: 16px; font-weight: 500; color: var(--ink2); margin-left: 6px; }
+.verdict { display: inline-block; padding: 3px 10px; border-radius: 999px; font-weight: 700; font-size: 13px; }
+.PASS { color: var(--pass); background: var(--pass-bg); }
+.BORDERLINE, .UNKNOWN { color: var(--warn); background: var(--warn-bg); }
+.FAIL { color: var(--fail); background: var(--fail-bg); }
+table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 10px 0; }
+td { padding: 5px 0; border-bottom: 1px solid var(--line); }
+td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.total td { font-weight: 700; border-bottom: 0; border-top: 2px solid var(--line); }
+td .hint { display: block; }
+.crit { list-style: none; padding: 0; margin: 10px 0 0; }
+.crit li { display: grid; grid-template-columns: 110px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.crit .verdict { font-size: 11px; text-align: center; align-self: start; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 12px 0; }
+.stat { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+.stat b { display: block; font-size: 17px; }
+.stat span { font-size: 12px; color: var(--ink2); }
+.error { color: var(--fail); background: var(--fail-bg); padding: 10px 12px; border-radius: 8px; }
+.htmx-request .hero { opacity: .5; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Buy calculator</h1>
+  <div class="sub">Rate {{ "%.2f"|format(rate) }} RMB/€ from config{% if order_rate %} · your orders, last 60 days: {{ "%.2f"|format(order_rate) }}{% endif %}
+    · targets ≥ €{{ targets.min_profit_eur|int }} profit and ≥ {{ (targets.min_profit_on_cost * 100)|int }}% on cost</div>
+  <div class="grid">
+    <form method="post" action="/go" hx-post="/go" hx-target="#result" hx-trigger="input delay:350ms, change, submit">
+      <div class="modes">
+        <label><input type="radio" name="mode" value="max" {% if mode != "calc" %}checked{% endif %}><span>Max price</span></label>
+        <label><input type="radio" name="mode" value="calc" {% if mode == "calc" %}checked{% endif %}><span>Check a listing</span></label>
+      </div>
+      <div class="field">
+        <label for="category">Category</label>
+        <select id="category" name="category">
+          {% for c in categories %}<option {% if form.category == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field only-calc">
+        <label for="rmb">Listing price (RMB per unit)</label>
+        <input id="rmb" name="rmb" inputmode="decimal" placeholder="e.g. 1580" value="{{ form.rmb or '' }}" autofocus>
+      </div>
+      <div class="field">
+        <label for="sell">Sell price (€)</label>
+        <input id="sell" name="sell" inputmode="decimal" placeholder="empty = median of your sales" value="{{ form.sell or '' }}">
+      </div>
+      <div class="field">
+        <label for="match">Only compare with sales whose name contains</label>
+        <input id="match" name="match" placeholder="e.g. 98, white, 1T, 512" value="{{ form.match or '' }}">
+      </div>
+      <div class="row only-max">
+        <div class="field"><label for="min_profit">Min profit €</label>
+          <input id="min_profit" name="min_profit" inputmode="decimal" placeholder="{{ targets.min_profit_eur|int }}" value="{{ form.min_profit or '' }}"></div>
+        <div class="field"><label for="min_poc">Min % on cost</label>
+          <input id="min_poc" name="min_poc" inputmode="decimal" placeholder="{{ (targets.min_profit_on_cost * 100)|int }}" value="{{ form.min_poc or '' }}"></div>
+      </div>
+      <details {% if form.parts or (form.qty or "1") != "1" or form.rate or (form.vat or "auto") != "auto" %}open{% endif %}>
+        <summary>More: platform, qty, parts, rate, VAT</summary>
+        <div class="row">
+          <div class="field"><label for="platform">Sell on</label>
+            <select id="platform" name="platform">
+              {% for p in platforms %}<option value="{{ p }}" {% if (form.platform or default_platform) == p %}selected{% endif %}>{{ p|capitalize }}</option>{% endfor %}
+            </select></div>
+          <div class="field"><label for="qty">Units bought together</label>
+            <input id="qty" name="qty" inputmode="numeric" value="{{ form.qty or '1' }}"></div>
+        </div>
+        <div class="row">
+          <div class="field"><label for="parts">Parts € per unit</label>
+            <input id="parts" name="parts" inputmode="decimal" placeholder="0" value="{{ form.parts or '' }}"></div>
+          <div class="field"><label for="rate">RMB per €</label>
+            <input id="rate" name="rate" inputmode="decimal" placeholder="{{ rate }}" value="{{ form.rate or '' }}"></div>
+        </div>
+        <div class="field"><label for="vat">Import VAT</label>
+          <select id="vat" name="vat">
+            {% for v, l in [("auto", "Category default"), ("on", "Always on"), ("off", "Off")] %}
+            <option value="{{ v }}" {% if (form.vat or "auto") == v %}selected{% endif %}>{{ l }}</option>{% endfor %}
+          </select></div>
+      </details>
+      <button type="submit">Calculate</button>
+      <p class="hint">Updates as you type. Everything stays on this computer.</p>
+    </form>
+    <section id="result">{% include "_result.html" %}</section>
+  </div>
+</main>
+</body>
+</html>

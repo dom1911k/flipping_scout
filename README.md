@@ -75,6 +75,60 @@ row's flaw flag, add `flaw_overrides: {<sheet row>: true|false}`.
 - The 2024 Japan (Yen) orders have no Sales Sheet rows, so they only appear in `purchases`.
 - `costs:` in config.yaml are placeholders for Phase 1. eBay private-seller fees haven't been looked up yet.
 
+## Phase 1: landed-cost and buy calculator
+
+```bash
+resell maxbuy -k N3DS -m 98                 # most RMB to pay, using your own sales of "…98" units
+resell maxbuy -k iPod -m 1T --profit 80     # override a target
+resell calc 1580 -k N3DS -m 98              # full breakdown + 5-criteria verdict for one listing
+resell calc 900 -k Minidisc --sell 180      # new category: import VAT is on by default
+resell serve                                # web page at http://127.0.0.1:8765
+```
+
+Run `resell import` first, so the calculator can use your sales history.
+
+**Landed cost per unit** (everything configured under `costs:` in config.yaml):
+- RMB ÷ your effective rate. The config value always wins. Your last-60-days order median and the
+  live ECB rate are shown next to it as hints.
+- Agent fee.
+- International shipping: weight × €/kg, with a minimum. The weight comes from the category or `--weight`.
+- Customs: since 1 Jul 2026, consignments ≤ €150 pay a flat €3 per tariff line. This is shared
+  across `--qty` units of the same kind. Above €150, the category's `duty_rate` applies (default 0%).
+- Import VAT at 19% on goods + shipping + customs. It is **off** for the categories you already buy
+  (your order sheets show no EUSt) and **on** for anything new. Force it with `--vat/--no-vat`.
+- Repair/upgrade parts.
+
+**Sell side:**
+- Platform fee: private eBay.de and Kleinanzeigen sales have no seller fee, and Vinted's fee is paid
+  by the buyer. These were checked Oct 2026 and are kept in config so they're easy to update.
+- Shipping to the buyer.
+- A returns/defect reserve, as a % per category.
+
+The sell price defaults to the median of your own sales: last 12 months, lost units and bulk sales
+excluded. `--match` narrows that to item names containing the text.
+
+**Outputs:**
+- profit, profit on cost, margin on revenue and break-even sell price
+- the 5-criteria score, with PASS / BORDERLINE / FAIL and the reason for each:
+  1. discontinued (from `category_profiles`)
+  2. not hype: your 12-month sell-price trend, clean units only, or `hype: true`
+  3. China edge (modded/refurbished pass, arbitrage borderline)
+  4. testability, downgraded to borderline if more than 40% of your units arrived flawed
+  5. profit ≥ €50 and ≥ 50% on cost; 40–50% on cost is borderline; cheap fast items have their own lower bar
+
+**Reverse mode** finds the highest RMB price per unit that still meets both the profit and
+profit-on-cost targets at the expected sell price, and says which target set the limit.
+
+**The web page** is a single page, with "Max price" and "Check a listing" modes. It updates as you
+type and accepts prices pasted as `¥1,580` or `1580元`. It uses HTMX from unpkg, and without it the
+form still works as a normal page. It binds to 127.0.0.1 only.
+
+**Known limits**
+- The hype trend uses only your own sales. Categories you haven't sold show UNKNOWN until Phase 4
+  adds EU sold data.
+- Customs duty rates per tariff code aren't looked up. Set `duty_rate` per category if one applies.
+- Shipping is a flat €/kg estimate. Calibrate `shipping_eur_per_kg` against a few Superbuy parcels.
+
 ## Tests
 
 ```bash

@@ -43,6 +43,8 @@ class Config(BaseModel):
     platforms: dict[str, dict[str, str]] = Field(default_factory=dict)
     ebay_account_revenue_cap_eur: float = 2000
     costs: dict[str, Any] = Field(default_factory=dict)
+    targets: dict[str, float] = Field(default_factory=dict)
+    category_profiles: dict[str, dict[str, Any]] = Field(default_factory=dict)
 
     root: Path = Path(".")
 

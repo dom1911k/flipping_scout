@@ -88,19 +88,62 @@ platforms:
 
 ebay_account_revenue_cap_eur: 2000   # per account per calendar year (your own rule)
 
-# ---------------------------------------------------------------- Phase 1 (placeholders, verified then)
+# ---------------------------------------------------------------- Phase 1: landed cost & calculator
 costs:
-  rmb_per_eur_effective: 7.9
-  agent_fee_per_item_eur: 0.5
+  # What you actually pay per € when buying RMB. This value always wins; the calculator only shows
+  # the live ECB rate and your recent order median next to it as a hint.
+  # Phase 0: 8.30 in Aug-Oct 2025, 7.60 in Oct 2026.
+  rmb_per_eur_effective: 7.6
+  agent_fee_per_item_eur: 0.5          # Superbuy add/service fee per item (sometimes 0-1)
+
+  # International shipping: weight x rate, never below the minimum. Weights per category below.
+  shipping_eur_per_kg: 22.0
+  shipping_min_eur: 1.0
+
+  # Import (EU, since 1 Jul 2026): consignments <= EUR 150 pay a flat EUR 3 per tariff line instead of
+  # duty; above that the normal duty rate applies. Import VAT (EUSt) is charged on goods + shipping + duty.
+  customs_flat_per_tariff_line_eur: 3.0
+  customs_flat_threshold_eur: 150
   import_vat_rate: 0.19
-  import_vat_enabled: true
-  outbound_shipping_eur: 6.0
-  shipping_share_eur:          # international shipping per item
-    N3DS: 9
-    iPod: 5
-    Vita card: 2
-    Bluetooth: 2
-  returns_reserve_pct:
-    N3DS: 0.05
-    iPod: 0.03
-  ebay_private_fees: null      # TODO Phase 1: look up current eBay.de private-seller fees
+  # Your order sheets have no EUSt line, so it's off for the categories you already buy, and ON for
+  # anything new, so estimates for new categories are never rosier than reality.
+  # Flip per category in category_profiles (import_vat: true/false).
+  import_vat_default: true
+
+  # Selling side, per platform. Private sales on eBay.de and Kleinanzeigen to German buyers have no
+  # seller fee (checked Oct 2026: eBay.de private sellers pay no final value or insertion fee since
+  # 2023; paid upgrades/promotions are extra). Vinted fees are paid by the buyer.
+  platforms_sell:
+    kleinanzeigen: {fee_pct: 0.0, fee_fixed_eur: 0.0, outbound_shipping_eur: 0.0}
+    ebay:          {fee_pct: 0.0, fee_fixed_eur: 0.0, outbound_shipping_eur: 6.0}
+    vinted:        {fee_pct: 0.0, fee_fixed_eur: 0.0, outbound_shipping_eur: 0.0}
+  default_platform: kleinanzeigen
+
+# Targets for the calculator and the reverse "max RMB" mode.
+targets:
+  min_profit_eur: 50            # criterion 5: profit >= EUR 50-100 per item...
+  good_profit_eur: 100
+  min_profit_on_cost: 0.50      # ...and >= 50% profit on what you paid
+  min_profit_on_cost_borderline: 0.40   # 40-50% on cost with enough profit = BORDERLINE, not FAIL
+  cheap_item_max_cost_eur: 40   # cheap/fast/low-risk exception
+  cheap_item_min_profit_eur: 20
+  cheap_item_max_days: 90
+  hype_trend_fail: -0.10        # 12-month sell-price change below -10% = hype/declining
+  hype_trend_ok: -0.03          # better than -3% = flat or rising
+  history_months: 12            # window for the median sell price from your own sales
+
+# What you know about each category, for the 5-criteria score. Anything not listed is treated as unknown.
+#  discontinued: no longer manufactured (true/false)
+#  hype: you left it on purpose because it was hype-driven (forces criterion 2 to FAIL)
+#  china_edge: modded | refurbished | arbitrage | none
+#  testability: easy | medium | hard   (hard = can't verify from photos / test in minutes)
+category_profiles:
+  N3DS:      {weight_kg: 0.40, returns_reserve_pct: 0.05, import_vat: false, discontinued: true, china_edge: modded, testability: easy}
+  iPod:      {weight_kg: 0.22, returns_reserve_pct: 0.03, import_vat: false, discontinued: true, china_edge: modded, testability: easy}
+  Vita card: {weight_kg: 0.03, returns_reserve_pct: 0.02, import_vat: false, discontinued: true, china_edge: arbitrage, testability: easy}
+  Bluetooth: {weight_kg: 0.05, returns_reserve_pct: 0.02, import_vat: false, discontinued: false, china_edge: arbitrage, testability: easy}
+  Grip:      {weight_kg: 0.25, returns_reserve_pct: 0.02, import_vat: false, discontinued: true, china_edge: arbitrage, testability: easy}
+  Camera:    {weight_kg: 0.30, returns_reserve_pct: 0.08, discontinued: true, china_edge: arbitrage, testability: hard}
+  DDR5:      {weight_kg: 0.15, returns_reserve_pct: 0.03, discontinued: false, hype: true, china_edge: arbitrage, testability: medium}
+  AYN:       {weight_kg: 0.80, returns_reserve_pct: 0.03, discontinued: false, hype: true, china_edge: arbitrage, testability: easy}
+  GB/GBA:    {weight_kg: 0.25, returns_reserve_pct: 0.05, discontinued: true, china_edge: modded, testability: easy}
