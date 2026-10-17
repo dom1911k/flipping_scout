@@ -1,0 +1,619 @@
+{
+ "source": "Screen_Recording_2026-10-17_131329.mp4 (seller storefront 狼黑杂货铺), hand-checked",
+ "frames": [
+  {
+   "frame": "f_001",
+   "page_kind": "xianyu_grid",
+   "cards": [
+    {
+     "title": "iPhone15Plus 128G黑色，美版无锁，改了双卡直",
+     "price_text": "¥1699",
+     "wants": 2,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 15 Plus",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "iPhone17ProMax 256G国行，银色直接插卡就能",
+     "price_text": "¥3700",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "24小时内发布"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 17 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "iPhone14Plus 128G白色，换过屏幕电池后置，功",
+     "price_text": "¥999",
+     "wants": 1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "24小时内发布"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 14 Plus",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "PSP3000墨绿色，成色还不错，功能都正常，全原装无拆修，",
+     "price_text": "¥488",
+     "wants": 1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "24小时内发布"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Sony PSP 3000",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "Pixel3 64G黑色，显示正常无老化，无锁的直接插卡就能",
+     "price_text": "¥350",
+     "wants": 2,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Google Pixel 3",
+     "product_class": "phone",
+     "likely_discontinued": true
+    },
+    {
+     "title": "iPhone17ProMax 512G行货白色，换过前后摄像",
+     "price_text": "¥5999",
+     "wants": 12,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 17 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "联想X1 Carbon 3代超级本，i7-5600U，8G内",
+     "price_text": "¥599",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Lenovo ThinkPad X1 Carbon Gen 3",
+     "product_class": "laptop",
+     "likely_discontinued": true
+    },
+    {
+     "title": "没了",
+     "price_text": "¥3699",
+     "wants": 45,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 16",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "华硕ROG Ally 16+512G硬盘，国行Z1E，在保到",
+     "price_text": "¥3099",
+     "wants": 12,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "ASUS ROG Ally Z1 Extreme",
+     "product_class": "handheld_console",
+     "likely_discontinued": false
+    },
+    {
+     "title": "华硕ROG Ally 16+1T硬盘，国行Z1E，在保到27",
+     "price_text": "¥3350",
+     "wants": 12,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "48小时内发布"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "ASUS ROG Ally Z1 Extreme",
+     "product_class": "handheld_console",
+     "likely_discontinued": false
+    },
+    {
+     "title": "New3DSLL 绿色成色新，全原装无拆修，64G卡可以帮忙",
+     "price_text": "¥1350",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "New Nintendo 3DS XL",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "iPhone17ProMax 256G国行，银色直接插卡就能",
+     "price_text": "¥3699",
+     "wants": 7,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 17 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    }
+   ]
+  },
+  {
+   "frame": "f_006",
+   "page_kind": "xianyu_grid",
+   "cards": [
+    {
+     "title": "联想X1 Carbon 3代超级本，i7-5600U，8G内",
+     "price_text": "¥599",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Lenovo ThinkPad X1 Carbon Gen 3",
+     "product_class": "laptop",
+     "likely_discontinued": true
+    },
+    {
+     "title": "没了",
+     "price_text": "¥3699",
+     "wants": 45,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 16",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "华硕ROG Ally 16+512G硬盘，国行Z1E，在保到",
+     "price_text": "¥3099",
+     "wants": 12,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "ASUS ROG Ally Z1 Extreme",
+     "product_class": "handheld_console",
+     "likely_discontinued": false
+    },
+    {
+     "title": "华硕ROG Ally 16+1T硬盘，国行Z1E，在保到27",
+     "price_text": "¥3350",
+     "wants": 12,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "48小时内发布"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "ASUS ROG Ally Z1 Extreme",
+     "product_class": "handheld_console",
+     "likely_discontinued": false
+    },
+    {
+     "title": "New3DSLL 绿色成色新，全原装无拆修，64G卡可以帮忙",
+     "price_text": "¥1350",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "New Nintendo 3DS XL",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "iPhone17ProMax 256G国行，银色直接插卡就能",
+     "price_text": "¥3699",
+     "wants": 7,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 17 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "New3DS 新小三 原装日版加上原装皮卡丘替换壳，总体成色",
+     "price_text": "¥1699",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "New Nintendo 3DS",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "Retroid Pocket 5 灰彩色 8+128G，骁龙",
+     "price_text": "¥999",
+     "wants": 5,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Retroid Pocket 5",
+     "product_class": "handheld_console",
+     "likely_discontinued": false
+    },
+    {
+     "title": "无",
+     "price_text": "¥5399",
+     "wants": 12,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 16 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "Viture Luma Ultra眼镜加智能颈环二代12+2",
+     "price_text": "¥3688",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Viture Luma Ultra",
+     "product_class": "smart_glasses",
+     "likely_discontinued": false
+    },
+    {
+     "title": "VISIONS康宁 VS2.5L的 玻璃陶瓷锅 琥珀色 带盖",
+     "price_text": "¥250",
+     "wants": 6,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "人气第5名"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Visions VS-32 glass cookware",
+     "product_class": "other",
+     "likely_discontinued": false
+    },
+    {
+     "title": "iPhone18Pro 256G国行，黑色铝合金边框四周有点",
+     "price_text": "¥8099",
+     "wants": 30,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 18 Pro",
+     "product_class": "phone",
+     "likely_discontinued": false
+    }
+   ]
+  },
+  {
+   "frame": "f_010",
+   "page_kind": "xianyu_grid",
+   "cards": [
+    {
+     "title": "New3DS 新小三 原装日版加上原装皮卡丘替换壳，总体成色",
+     "price_text": "¥1699",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "New Nintendo 3DS",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "没了",
+     "price_text": "¥3499",
+     "wants": 7,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPad Pro",
+     "product_class": "tablet",
+     "likely_discontinued": false
+    },
+    {
+     "title": "PSP3000白色 外观不错，09G主板，全原装无拆修，6.",
+     "price_text": "¥525",
+     "wants": 5,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Sony PSP 3000",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "没开",
+     "price_text": "¥1499",
+     "wants": 22,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 16",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "Viture Luma Ultra串流套装，盒子配件全套都在",
+     "price_text": "¥4299",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Viture Luma Ultra",
+     "product_class": "smart_glasses",
+     "likely_discontinued": false
+    },
+    {
+     "title": "NDSL 日版白色，外观新，显示正常无明显老化痕迹，功能都好",
+     "price_text": "¥299",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Nintendo DS Lite",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "Pixel8 8+128G绿色 外观小磕碰，显示完好无瑕疵无",
+     "price_text": "¥1350",
+     "wants": 4,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Google Pixel 8",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "",
+     "price_text": "",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": true,
+     "product_type": "New Nintendo 3DS",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    }
+   ]
+  },
+  {
+   "frame": "f_011",
+   "page_kind": "xianyu_grid",
+   "cards": [
+    {
+     "title": "没了",
+     "price_text": "¥3499",
+     "wants": 7,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPad Pro",
+     "product_class": "tablet",
+     "likely_discontinued": false
+    },
+    {
+     "title": "PSP3000白色 外观不错，09G主板，全原装无拆修，6.",
+     "price_text": "¥525",
+     "wants": 5,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Sony PSP 3000",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "没开",
+     "price_text": "¥1499",
+     "wants": 22,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 16",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "Viture Luma Ultra串流套装，盒子配件全套都在",
+     "price_text": "¥4299",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Viture Luma Ultra",
+     "product_class": "smart_glasses",
+     "likely_discontinued": false
+    },
+    {
+     "title": "NDSL 日版白色，外观新，显示正常无明显老化痕迹，功能都好",
+     "price_text": "¥299",
+     "wants": -1,
+     "seller": "狼黑杂货铺",
+     "badges": [
+      "描述不符包邮退"
+     ],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Nintendo DS Lite",
+     "product_class": "handheld_console",
+     "likely_discontinued": true
+    },
+    {
+     "title": "Pixel8 8+128G绿色 外观小磕碰，显示完好无瑕疵无",
+     "price_text": "¥1350",
+     "wants": 4,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Google Pixel 8",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "iPhone15ProMax 512G美版 有锁卡贴，黑色，",
+     "price_text": "¥3599",
+     "wants": 3,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 15 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "iPhone16ProMax 256G黑色钛金属，换过国产高",
+     "price_text": "¥3299",
+     "wants": 32,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 16 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "iPhone16ProMax 256G黑色钛金属，全原装外观",
+     "price_text": "¥4299",
+     "wants": 6,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "iPhone 16 Pro Max",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "三星Galaxy Z Fold7国行 12+512G，全原装有",
+     "price_text": "¥6899",
+     "wants": 3,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Samsung Galaxy Z Fold7",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "三星Z Fold7 12+256G 银色国行，外观还不错，功",
+     "price_text": "¥6088",
+     "wants": 6,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Samsung Galaxy Z Fold7",
+     "product_class": "phone",
+     "likely_discontinued": false
+    },
+    {
+     "title": "三星Z Fold7 12+512G蓝色，港版双卡双待跟国行一",
+     "price_text": "¥6999",
+     "wants": 7,
+     "seller": "狼黑杂货铺",
+     "badges": [],
+     "original_price_text": "",
+     "partial": false,
+     "product_type": "Samsung Galaxy Z Fold7",
+     "product_class": "phone",
+     "likely_discontinued": false
+    }
+   ]
+  }
+ ]
+}

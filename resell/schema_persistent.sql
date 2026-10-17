@@ -33,7 +33,12 @@ CREATE TABLE IF NOT EXISTS candidates (
     name          TEXT NOT NULL,
     calc_category TEXT,               -- cost profile to use (e.g. N3DS, iPod); null = new category defaults
     own_sales_match TEXT,             -- regex on your Sales Sheet item names to include your own sales as evidence
-    status        TEXT,               -- idea | researching | test_buy | active | dropped
+    match_terms   TEXT,               -- regex matching listing titles (Chinese and EU) to this candidate
+    query_eu      TEXT,               -- eBay search query (German/English)
+    exclude_terms TEXT,               -- eBay exclusions, e.g. "-defekt -ersatzteil -bastler -hülle -case"
+    variant_terms TEXT,               -- regex the title must contain to be the variant you price (e.g. "ips")
+    variant_question_zh TEXT,         -- what to ask the seller when the title doesn't say
+    status        TEXT,               -- new | watching | shortlist | active | dropped
     discontinued  TEXT,               -- e.g. "2013 (OLED model); line ended 2019"; empty = unknown
     china_edge    TEXT,               -- modded | refurbished | arbitrage | none
     testability   TEXT,               -- easy | medium | hard
@@ -67,4 +72,43 @@ CREATE TABLE IF NOT EXISTS evidence (
     condition  TEXT,
     url        TEXT,
     added      TEXT
+);
+
+-- Phase 4d: screen recordings and the listings read from them (yours; never dropped)
+CREATE TABLE IF NOT EXISTS recordings (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    file        TEXT NOT NULL,
+    sha256      TEXT NOT NULL UNIQUE,     -- the same video is never processed (or paid for) twice
+    kind        TEXT,                     -- xianyu_grid | ebay_sold | kleinanzeigen
+    label       TEXT,                     -- e.g. seller name or search term
+    processed   TEXT,
+    frames      INTEGER,
+    input_tokens  INTEGER,
+    output_tokens INTEGER,
+    cost_usd    REAL
+);
+
+CREATE TABLE IF NOT EXISTS xianyu_listings (
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    recording_id  INTEGER NOT NULL,
+    seller        TEXT,
+    title         TEXT,
+    price_rmb     REAL,
+    price_text    TEXT,
+    wants         INTEGER,
+    badges        TEXT,                   -- JSON list
+    original_price_rmb REAL,
+    product_type  TEXT,
+    product_class TEXT,
+    likely_discontinued INTEGER,
+    flags         TEXT,                   -- comma list: multi_sku, wanted_ad, service, accessory, no_title
+    candidate     TEXT,
+    landed_eur    REAL,
+    max_rmb       REAL,
+    sell_eur      REAL,
+    sell_basis    TEXT,
+    verdict       TEXT,
+    follow_up_zh  TEXT,
+    frames        TEXT,
+    seen          TEXT
 );

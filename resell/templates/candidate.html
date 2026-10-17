@@ -24,6 +24,11 @@
       </div>
       <div class="field"><label>Xianyu search terms</label><input name="keywords_zh" value="{{ a.cand.keywords_zh or '' }}"></div>
       <div class="field"><label>eBay / Terapeak search terms</label><input name="keywords_eu" value="{{ a.cand.keywords_eu or '' }}"></div>
+      <div class="field"><label>Title match (regex, Chinese + EU)</label><input name="match_terms" value="{{ a.cand.match_terms or '' }}"></div>
+      <div class="row">
+        <div class="field"><label>eBay query</label><input name="query_eu" value="{{ a.cand.query_eu or '' }}"></div>
+        <div class="field"><label>eBay exclusions</label><input name="exclude_terms" value="{{ a.cand.exclude_terms or '' }}"></div>
+      </div>
       <div class="row">
         <div class="field"><label>Cost profile</label><input name="calc_category" placeholder="e.g. iPod (empty = new)" value="{{ a.cand.calc_category or '' }}"></div>
         <div class="field"><label>Own sales matching</label><input name="own_sales_match" placeholder="regex on item names" value="{{ a.cand.own_sales_match or '' }}"></div>

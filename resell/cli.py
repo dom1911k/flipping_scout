@@ -414,3 +414,46 @@ def research_cn(candidate: str, text: str = typer.Argument(..., help="Xianyu sha
         raise typer.BadParameter("no price found")
     RS.add_evidence(load_config(config), candidate, "cn_asking", [p], "xianyu")
     typer.echo(f"added ¥{p.price:.0f} {p.title or ''}")
+
+
+# ----------------------------------------------------------------------------- Phase 4d: recordings
+
+@app.command()
+def record(
+    video: Path = typer.Argument(..., help="Screen recording (.mp4/.mov)"),
+    kind: str = typer.Option("xianyu_grid", "--kind", "-k", help="xianyu_grid | ebay_sold | kleinanzeigen"),
+    label: str = typer.Option(None, "--label", "-l", help="e.g. the seller or search term"),
+    candidate: str = typer.Option(None, "--candidate", "-c", help="ebay_sold/kleinanzeigen: assign all rows to this candidate"),
+    extraction: Path = typer.Option(None, "--from-json", help="Use an existing extraction JSON instead of Claude vision"),
+    config: Path = ConfigOpt,
+):
+    """Read a screen recording (Xianyu grid, eBay sold, Kleinanzeigen) into listings and a report."""
+    import json as _json
+
+    from . import recordings as REC
+
+    cfg = load_config(config)
+    ext = _json.loads(extraction.read_text(encoding="utf-8")) if extraction else None
+    res = REC.process(cfg, video, kind=kind, label=label, extraction=ext, force_candidate=candidate)
+    path = REC.write_report(cfg, res)
+    typer.echo(REC.report_md(res))
+    typer.echo(f"report: {path}")
+
+
+# ----------------------------------------------------------------------------- Phase 4b: eBay Browse API
+
+@app.command("ebay-scan")
+def ebay_scan(candidate: list[str] = typer.Option(None, "--candidate", "-c", help="Only these candidate ids"),
+              de_only: bool = typer.Option(False, "--de-only", help="Skip the EU-wide context run"),
+              config: Path = ConfigOpt):
+    """Weekly eBay snapshot per candidate (official Browse API): listings, prices, probable sales."""
+    from . import ebay as EB
+
+    snaps = EB.scan(load_config(config), candidate or None, ("de",) if de_only else ("de", "eu"))
+    typer.echo(f"\n{'Candidate':<16}{'Scope':<6}{'Active':>7}{'p25':>7}{'Median':>8}{'p75':>7}{'Auct.':>7}{'Prob. sales':>12}")
+    for s in snaps:
+        f = lambda v: f"€{v:.0f}" if v is not None else "-"
+        typer.echo(f"{s.candidate:<16}{s.scope:<6}{s.kept:>7}{f(s.p25):>7}{f(s.median):>8}{f(s.p75):>7}"
+                   f"{(f'{s.auction_share:.0%}' if s.auction_share is not None else '-'):>7}"
+                   f"{(str(s.probable_sales) if s.probable_sales is not None else 'first run' if s.complete else 'incomplete'):>12}")
+    typer.echo("\nProbable sales = listings that vanished before their end date since the last run (an estimate, not sold data).")

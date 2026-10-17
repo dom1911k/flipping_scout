@@ -165,3 +165,26 @@ replies:
 research:
   # Rough conversion for pasted USD/GBP sold prices (EUR and CNY are handled already). Update now and then.
   fx_to_eur: {USD: 0.86, GBP: 1.15}
+  # Spec 4e quick mode for scouting: landed = RMB / rate + fixed_eur;
+  # max price = (min(sell - target_profit, sell / (1 + target_markup)) - fixed_eur) x rate
+  quick:
+    rate: null                 # null = costs.rmb_per_eur_effective
+    fixed_eur: 10
+    target_profit_eur: 50
+    target_markup: 0.5
+  browse_discount: 0.15        # eBay asking median -> estimated sell price when no sold data exists
+  discovery_classes: [handheld_console, retro_console, portable_audio, headphones, camera]
+  recordings:
+    model: claude-opus-5-5     # Claude vision reads the frames
+    effort: medium
+    frames_per_request: 4      # fewer = smaller answers; more = fewer requests
+    max_frames: 90             # ~1.5 min of scrolling at 1 frame/s after de-duplication
+    cache_dir: data/recordings
+    price_per_mtok_usd: {input: 4.0, output: 20.0}   # for the cost line in the report
+  ebay:                        # Browse API (official). Credentials in .env: EBAY_CLIENT_ID / EBAY_CLIENT_SECRET
+    marketplace: EBAY_DE
+    country: DE                # the "de" scope filters on item location; "eu" runs without it
+    condition: USED
+    max_items: 600             # per candidate and scope (3 pages of 200); disappearance tracking needs all matches
+    pause_seconds: 0.5
+    cache_dir: data/ebay_cache

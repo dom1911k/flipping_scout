@@ -19,7 +19,8 @@ import yaml
 from . import calc, db
 from .config import Config
 
-STATUSES = ("idea", "researching", "test_buy", "active", "dropped")
+STATUSES = ("new", "watching", "shortlist", "active", "dropped")
+OLD_STATUS = {"idea": "new", "researching": "watching", "test_buy": "shortlist"}
 EDGES = ("modded", "refurbished", "arbitrage", "none")
 TESTABILITY = ("easy", "medium", "hard")
 SOURCES = ("terapeak", "ebay_sold", "pricecharting", "kleinanzeigen", "xianyu", "manual")
@@ -45,8 +46,24 @@ def _con(cfg: Config):
 
 # ----------------------------------------------------------------------------- candidates & findings
 
+def migrate(cfg: Config) -> None:
+    """Old status names -> new ones; fill match/query fields from the seed for seeded candidates."""
+    data = yaml.safe_load(resources.files("resell").joinpath("content", "candidates_seed.yaml").read_text(encoding="utf-8"))
+    con = _con(cfg)
+    with con:
+        for old, new in OLD_STATUS.items():
+            con.execute("UPDATE candidates SET status = ? WHERE status = ?", (new, old))
+        for c in data["candidates"]:
+            for col in ("match_terms", "query_eu", "exclude_terms", "variant_terms", "variant_question_zh"):
+                if c.get(col):
+                    con.execute(f"UPDATE candidates SET {col} = ? WHERE id = ? AND ({col} IS NULL OR {col} = '')",
+                                (c[col], c["id"]))
+    con.close()
+
+
 def seed(cfg: Config) -> int:
     """Insert the starting candidates + findings once (existing ids are left alone)."""
+    migrate(cfg)
     data = yaml.safe_load(resources.files("resell").joinpath("content", "candidates_seed.yaml").read_text(encoding="utf-8"))
     con, n = _con(cfg), 0
     with con:
@@ -54,10 +71,11 @@ def seed(cfg: Config) -> int:
             if con.execute("SELECT 1 FROM candidates WHERE id = ?", (c["id"],)).fetchone():
                 continue
             con.execute(
-                "INSERT INTO candidates (id, name, calc_category, own_sales_match, status, discontinued, china_edge, "
-                "testability, hype, new_devices, weight_kg, keywords_zh, keywords_eu, notes, updated) "
-                "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (c["id"], c["name"], c.get("calc_category"), c.get("own_sales_match"), c.get("status", "idea"), c.get("discontinued"),
+                "INSERT INTO candidates (id, name, calc_category, own_sales_match, match_terms, query_eu, exclude_terms, "
+                "status, discontinued, china_edge, testability, hype, new_devices, weight_kg, keywords_zh, keywords_eu, "
+                "notes, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (c["id"], c["name"], c.get("calc_category"), c.get("own_sales_match"), c.get("match_terms"),
+                 c.get("query_eu"), c.get("exclude_terms"), OLD_STATUS.get(c.get("status"), c.get("status", "new")), c.get("discontinued"),
                  c.get("china_edge"), c.get("testability"), int(c.get("hype", 0)), int(c.get("new_devices", 0)),
                  c.get("weight_kg"), c.get("keywords_zh"), c.get("keywords_eu"), c.get("notes"), _now()))
             for f in c.get("findings", []):
@@ -65,6 +83,7 @@ def seed(cfg: Config) -> int:
                             (c["id"], f["criterion"], f["text"], f.get("source"), _now()))
             n += 1
     con.close()
+    migrate(cfg)   # fill match/variant fields for the rows just inserted
     return n
 
 
@@ -79,7 +98,7 @@ def add_candidate(cfg: Config, name: str, **fields) -> str:
         if con.execute("SELECT 1 FROM candidates WHERE id = ?", (cid,)).fetchone():
             raise ValueError(f"candidate '{cid}' already exists")
         con.execute("INSERT INTO candidates (id, name, status, updated) VALUES (?,?,?,?)",
-                    (cid, name, fields.pop("status", "idea"), _now()))
+                    (cid, name, fields.pop("status", "new"), _now()))
     con.close()
     if fields:
         update_candidate(cfg, cid, **fields)
@@ -87,7 +106,8 @@ def add_candidate(cfg: Config, name: str, **fields) -> str:
 
 
 def update_candidate(cfg: Config, cid: str, **fields) -> None:
-    allowed = {"name", "calc_category", "own_sales_match", "status", "discontinued", "china_edge", "testability", "hype",
+    allowed = {"name", "calc_category", "own_sales_match", "match_terms", "query_eu", "exclude_terms",
+               "variant_terms", "variant_question_zh", "status", "discontinued", "china_edge", "testability", "hype",
                "new_devices", "weight_kg", "keywords_zh", "keywords_eu", "notes"}
     bad = set(fields) - allowed
     if bad:
@@ -480,7 +500,7 @@ def assess(cfg: Config, cand: dict, findings: pd.DataFrame, ev: pd.DataFrame, sa
     for crit, field_ in ((1, "discontinued"), (3, "china_edge"), (4, "testability")):
         if not cand.get(field_):
             a.next_steps.append(f"Set '{field_}' (criterion {crit}).")
-    if a.verdict == calc.PASS and cand.get("status") in ("idea", "researching"):
+    if a.verdict == calc.PASS and cand.get("status") in ("new", "watching"):
         a.next_steps.append("All five criteria pass: send the seller checklist and do a 1-3 unit test buy.")
     if cand.get("new_devices"):
         a.warnings.append("ElektroG: importing NEW electrical devices may make you a 'Hersteller' needing stiftung ear "
@@ -495,6 +515,6 @@ def assess_all(cfg: Config) -> list[Assessment]:
     if cands.empty:
         return []
     out = [assess(cfg, c, findings, ev) for c in cands.to_dict("records")]
-    order = {"active": 0, "test_buy": 1, "researching": 2, "idea": 3, "dropped": 4}
+    order = {"active": 0, "shortlist": 1, "watching": 2, "new": 3, "dropped": 4}
     rank = {calc.PASS: 0, calc.BORDERLINE: 1, calc.UNKNOWN: 2, calc.FAIL: 3}
     return sorted(out, key=lambda a: (order.get(a.cand.get("status"), 5), rank.get(a.verdict, 2), a.cand["name"]))

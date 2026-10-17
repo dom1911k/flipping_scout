@@ -192,7 +192,7 @@ def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
     async def research_new(request: Request):
         form = dict(await request.form())
         try:
-            cid = rs.add_candidate(cfg(), form["name"].strip(), status="idea")
+            cid = rs.add_candidate(cfg(), form["name"].strip(), status="new")
         except ValueError:
             cid = rs.slug(form["name"])
         return RedirectResponse(f"/research/{cid}", status_code=303)
@@ -221,8 +221,8 @@ def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
         form = dict(await request.form())
         fields = {k: (form.get(k) or "").strip() or None for k in
                   ("status", "discontinued", "china_edge", "testability", "keywords_zh", "keywords_eu",
-                   "calc_category", "own_sales_match", "notes")}
-        fields["status"] = fields["status"] or "idea"
+                   "calc_category", "own_sales_match", "match_terms", "query_eu", "exclude_terms", "notes")}
+        fields["status"] = fields["status"] or "new"
         fields["weight_kg"] = _num(form.get("weight_kg"))
         fields["hype"] = int(bool(form.get("hype")))
         fields["new_devices"] = int(bool(form.get("new_devices")))

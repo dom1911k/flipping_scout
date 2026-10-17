@@ -176,6 +176,81 @@ do a 1–3 unit test buy". Ticking "new devices" shows an ElektroG warning.
 - USD/GBP prices are converted at the rough rates in `config.yaml → research.fx_to_eur`.
 - Xianyu prices are asking prices, not sold prices, so expect to pay a little less.
 
+## Phase 4d: Xianyu screen recordings → scored listings
+
+```bash
+export ANTHROPIC_API_KEY=...            # recordings are read with Claude vision
+resell record ~/Movies/xianyu_shop.mp4 --label 狼黑杂货铺             # Xianyu storefront or search grid
+resell record ebay_sold_psp.mp4 --kind ebay_sold --candidate psp      # eBay "Verkaufte Artikel" / Terapeak
+resell record ka_search.mp4 --kind kleinanzeigen --candidate psp      # Kleinanzeigen asking prices
+```
+
+**What it does:**
+1. Pulls frames from the video with ffmpeg: 1 per second, near-identical frames dropped, scaled to 1568 px.
+   A 12 s clip gives 11 frames.
+2. Sends 4 frames per request to Claude vision with a fixed JSON schema. Per card it reads title,
+   price (incl. `¥1.88万`), 想要, seller, badges, struck-through price, model (from title *and* photo,
+   so placeholder titles like `没了` still get identified), product class and "likely discontinued".
+3. Merges the same card seen in overlapping frames.
+4. Sets **trap flags:**
+   - `multi_sku`: 价格不一 / 多款 / 都有 / 可选 / 私聊 / ranges like `16到128g`, `64g/128g`.
+   - `wanted_ad`: 收 / 回收 / 求购. These are excluded.
+   - `service`: 寄改 / 改装费 / 代刷 / 代改 / 教程. Bare `代` is NOT used, because 3代 / 二代 mean "generation".
+   - `accessory`.
+   - `no_title`.
+   - `variant_unclear`: the candidate is a specific variant (dual IPS, modded storage) and the title doesn't say so.
+5. Matches listings to candidates through each candidate's `match_terms` regex.
+6. Scores each listing in **quick mode:** landed = RMB ÷ rate + €10, and max = (min(sell − €50, sell ÷ 1.5) − €10) × rate.
+   The sell price is your sold median (90 days, else 12 months). Without that it falls back to the
+   eBay asking median −15%, labelled as an estimate.
+   Verdicts: `buy-check`, `close`, `ask` (with the Chinese question for the seller), `too high`, `no EU price yet`.
+7. **Discovery:** product types in your classes (handhelds, portable audio, headphones, cameras) that
+   look discontinued and aren't candidates yet are added as `new`, together with the listing that
+   triggered them.
+8. **Sellers:** "likely supplier/modder" (repeats + mostly your stock, or batch/mod wording) vs
+   "has your kind of stock" vs one-off. Each recording is compared with that seller's previous one
+   (new items, price drops), which replaces Distill.
+9. Writes `reports/recordings/<date>_<id>_<label>.md`.
+
+The extraction is cached per video in `data/recordings/<sha256>.json`. Re-running the same video costs
+nothing; `--from-json` uses a saved extraction directly.
+
+**Cost:** about 1,600 input tokens per frame. The 12 s sample works out at roughly $0.15, and a 1-minute
+recording at about $0.40–0.60. The exact cost of each run is printed in its report.
+
+**Known limits**
+- Recording tips: desktop web grid, scroll slowly and steadily, don't zoom.
+- Fast scrolling can skip a row entirely. A row is only read if it appears whole in at least one frame.
+- `likely_discontinued` is Claude's judgement. Discovery can add a wrong candidate; set it to `dropped`.
+
+## Phase 4b: eBay Browse API (weekly)
+
+```bash
+# .env (gitignored) in the project folder:
+#   EBAY_CLIENT_ID=...
+#   EBAY_CLIENT_SECRET=...
+resell ebay-scan                 # all non-dropped candidates, DE + EU-wide
+resell ebay-scan -c psp --de-only
+```
+
+**What it does:**
+- Gets a client-credentials token, then searches `item_summary/search` with `EBAY_DE`, `conditions:{USED}`,
+  and `itemLocationCountry:DE` for the DE scope.
+- Fetches up to 600 items per candidate and scope. Exclusion terms are applied to titles locally.
+- Stores per run: active count, p25/median/p75, auction share, and every item ID.
+- **Probable sales** are items present last week, gone now, whose scheduled end hadn't passed. This is
+  only computed when both runs saw every match, and it is an *estimate*, not sold data.
+- Responses are cached per day; one run a week is plenty.
+- **Weekly scheduling:** cron `0 8 * * 0 cd ~/flipping_scout && resell ebay-scan`, or Windows Task Scheduler.
+
+**Policy:**
+- No eBay data is ever sent to Claude. eBay's June 2025 licence restricts feeding API data to generative AI.
+- Read the licence's "Restricted APIs" section when you get your keyset.
+
+**Not yet verified live:** the code follows eBay's documented request and response format and is
+tested against simulated responses. The first real run on your machine will show whether
+`itemLocationCountry` and the response fields behave as documented.
+
 ## Phase 2: seller messages, arrival check and seller scorecard
 
 ```bash
