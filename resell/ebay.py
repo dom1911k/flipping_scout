@@ -25,7 +25,7 @@ from pathlib import Path
 import httpx
 
 from . import db, research
-from .config import Config
+from .config import Config, load_env
 
 TOKEN_URL = "https://api.ebay.com/identity/v1/oauth2/token"
 SEARCH_URL = "https://api.ebay.com/buy/browse/v1/item_summary/search"
@@ -70,16 +70,6 @@ def _con(cfg: Config):
 
 
 # ----------------------------------------------------------------------------- credentials & token
-
-def load_env(path: Path) -> None:
-    """Minimal .env reader (KEY=value lines); real environment variables win."""
-    if not path.exists():
-        return
-    for line in path.read_text(encoding="utf-8").splitlines():
-        m = re.match(r"\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$", line)
-        if m and not line.lstrip().startswith("#"):
-            os.environ.setdefault(m.group(1), m.group(2).strip().strip('"').strip("'"))
-
 
 def credentials(cfg: Config) -> tuple[str, str]:
     load_env(cfg.root / ".env")

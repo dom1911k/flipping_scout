@@ -179,7 +179,7 @@ do a 1–3 unit test buy". Ticking "new devices" shows an ElektroG warning.
 ## Phase 4d: Xianyu screen recordings → scored listings
 
 ```bash
-export ANTHROPIC_API_KEY=...            # recordings are read with Claude vision
+# ANTHROPIC_API_KEY=... in .env (or the environment): recordings are read with Claude vision
 resell record ~/Movies/xianyu_shop.mp4 --label 狼黑杂货铺             # Xianyu storefront or search grid
 resell record ebay_sold_psp.mp4 --kind ebay_sold --candidate psp      # eBay "Verkaufte Artikel" / Terapeak
 resell record ka_search.mp4 --kind kleinanzeigen --candidate psp      # Kleinanzeigen asking prices
@@ -236,7 +236,7 @@ resell ebay-scan -k psp --de-only
 **What it does:**
 - Gets a client-credentials token, then searches `item_summary/search` with `EBAY_DE`, fixed-price + auction, used/refurbished condition IDs,
   and `itemLocationCountry:DE` for the DE scope.
-- Fetches up to 600 items per candidate and scope. Titles must match the candidate's match regex and contain
+- Fetches up to 1,000 items per candidate and scope, within the candidate's eBay category IDs (devices only). Titles must match the candidate's match regex and contain
   no exclusion term (keeps games, chargers and other models out). Prices come from fixed-price listings;
   auctions only count towards the auction share.
 - Stores per run: active count, p25/median/p75, auction share, and every item ID.
@@ -249,9 +249,8 @@ resell ebay-scan -k psp --de-only
 - No eBay data is ever sent to Claude. eBay's June 2025 licence restricts feeding API data to generative AI.
 - Read the licence's "Restricted APIs" section when you get your keyset.
 
-**Not yet verified live:** the code follows eBay's documented request and response format and is
-tested against simulated responses. The first real run on your machine will show whether
-`itemLocationCountry` and the response fields behave as documented.
+**Verified live** on 18 Oct 2026 (first scan of all 14 candidates). Also shown on the Research page:
+eBay DE asking median, listing count and probable sales over 90 days.
 
 ## Phase 2: seller messages, arrival check and seller scorecard
 

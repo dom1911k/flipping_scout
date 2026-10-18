@@ -12,6 +12,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from . import calc
+from . import ebay as eb
 from . import inspection as insp
 from . import replies as rep
 from . import research as rs
@@ -186,7 +187,9 @@ def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
         cands, _, _ = rs.load(c)
         if cands.empty:
             rs.seed(c)
-        return HTMLResponse(env.get_template("research.html").render(active="/research", rows=rs.assess_all(c)))
+        rows = rs.assess_all(c)
+        ebay_de = {a.cand["id"]: eb.demand(c, a.cand["id"]) for a in rows}
+        return HTMLResponse(env.get_template("research.html").render(active="/research", rows=rows, ebay=ebay_de))
 
     @app.post("/research/new")
     async def research_new(request: Request):

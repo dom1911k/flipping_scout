@@ -1,6 +1,9 @@
 """Load and validate config.yaml."""
 from __future__ import annotations
 
+import os
+import re
+
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -63,4 +66,15 @@ def load_config(path: str | Path = "config.yaml") -> Config:
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     cfg = Config(**raw)
     cfg.root = path.resolve().parent
+    load_env(cfg.root / ".env")
     return cfg
+
+
+def load_env(path: Path) -> None:
+    """Minimal .env reader (KEY=value lines) for the eBay and Anthropic keys; real environment variables win."""
+    if not path.exists():
+        return
+    for line in path.read_text(encoding="utf-8-sig").splitlines():   # -sig: Windows Notepad adds a BOM
+        m = re.match(r"\s*([A-Z_][A-Z0-9_]*)\s*=\s*(.*)\s*$", line)
+        if m and not line.lstrip().startswith("#"):
+            os.environ.setdefault(m.group(1), m.group(2).strip().strip('"').strip("'"))
