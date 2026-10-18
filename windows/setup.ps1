@@ -107,7 +107,14 @@ foreach ($l in $links) {
     $s.IconLocation = $l.Icon
     $s.Save()
 }
-Write-Host "Added 'Resell Toolkit' and 'Resell Toolkit Update' to your desktop."
+# A command window where 'resell ...' commands work straight away (activate.bat isn't blocked like Activate.ps1).
+$s = $shell.CreateShortcut((Join-Path $desktop "Resell Terminal.lnk"))
+$s.TargetPath = "$env:SystemRoot\System32\cmd.exe"
+$s.Arguments = "/k `"cd /d `"$Root`" && .venv\Scripts\activate.bat && echo Type resell --help to see all commands.`""
+$s.WorkingDirectory = $Root
+$s.IconLocation = "%SystemRoot%\System32\cmd.exe,0"
+$s.Save()
+Write-Host "Added 'Resell Toolkit', 'Resell Toolkit Update' and 'Resell Terminal' to your desktop."
 
 # 6. Sunday eBay scan ---------------------------------------------------------------------------------
 Step "Weekly eBay scan (Sundays 09:00)"

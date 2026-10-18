@@ -13,8 +13,8 @@ irm https://raw.githubusercontent.com/dom1911k/flipping_scout/claude/gracious-di
 ```
 
 It installs Git, Python 3.12 and ffmpeg (via winget), downloads the toolkit to `%USERPROFILE%\ResellToolkit`,
-installs its packages, asks for your keys (`.env`, opened in Notepad) and your sales sheet, adds two desktop
-shortcuts (**Resell Toolkit**, **Resell Toolkit Update**) and schedules the Sunday eBay scan. Running it
+installs its packages, asks for your keys (`.env`, opened in Notepad) and your sales sheet, adds three desktop
+shortcuts (**Resell Toolkit**, **Resell Toolkit Update**, **Resell Terminal** for `resell` commands) and schedules the Sunday eBay scan. Running it
 again only adds what's missing.
 
 **Updating:** the **Update** tab in the web page, the **Resell Toolkit Update** shortcut, or `resell update`.
