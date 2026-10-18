@@ -174,6 +174,32 @@ def serve(host: str = "127.0.0.1", port: int = 8765, config: Path = ConfigOpt):
     uvicorn.run(create_app(config), host=host, port=port)
 
 
+@app.command()
+def update(check_only: bool = typer.Option(False, "--check", help="Only say whether an update is available")):
+    """Get the latest version from GitHub. Your data, keys and config.local.yaml are kept."""
+    from . import updater
+
+    root = Path(__file__).resolve().parent.parent
+    if check_only:
+        st = updater.check(root)
+        if not st.ok:
+            raise typer.Exit(typer.echo(f"Can't check: {st.error}", err=True) or 1)
+        typer.echo(f"{st.behind} update(s) available." if st.behind else "Up to date.")
+        for line in st.incoming:
+            typer.echo(f"  - {line}")
+        return
+    res = updater.update(root)
+    if not res.ok:
+        raise typer.Exit(typer.echo(f"Update failed: {res.error}", err=True) or 1)
+    if not res.updated:
+        typer.echo("Already up to date.")
+        return
+    typer.echo(f"Updated {res.before} -> {res.after}" + (" (packages reinstalled)" if res.reinstalled else ""))
+    for line in res.changes:
+        typer.echo(f"  - {line}")
+    typer.echo("Restart the web page (close its window, open Resell Toolkit again) to use the new version.")
+
+
 # ----------------------------------------------------------------------------- Phase 2
 
 @app.command()

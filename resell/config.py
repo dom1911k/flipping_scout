@@ -64,10 +64,21 @@ class Config(BaseModel):
 def load_config(path: str | Path = "config.yaml") -> Config:
     path = Path(path)
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
+    # Your own settings live in data/config.local.yaml (gitignored), so updates never overwrite them.
+    local = path.resolve().parent / "data" / "config.local.yaml"
+    if local.exists():
+        raw = _merge(raw, yaml.safe_load(local.read_text(encoding="utf-8-sig")) or {})
     cfg = Config(**raw)
     cfg.root = path.resolve().parent
     load_env(cfg.root / ".env")
     return cfg
+
+
+def _merge(base: dict, over: dict) -> dict:
+    out = dict(base)
+    for k, v in over.items():
+        out[k] = _merge(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else v
+    return out
 
 
 def load_env(path: Path) -> None:

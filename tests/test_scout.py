@@ -196,3 +196,50 @@ def test_browse_sell_price_fallback(cfg):
     sells = REC.sell_prices(cfg)
     eur, basis = sells["psp"]
     assert eur == pytest.approx(110 * 0.85) and "estimate" in basis
+
+
+# ----------------------------------------------------------------------------- updater
+
+def test_updater_pulls_and_keeps_local_edits(tmp_path):
+    import subprocess
+
+    from resell import updater
+
+    def git(cwd, *a):
+        subprocess.run(["git", *a], cwd=cwd, check=True, capture_output=True)
+
+    origin, clone = tmp_path / "origin", tmp_path / "clone"
+    origin.mkdir()
+    git(origin, "init", "-q", "-b", "main")
+    git(origin, "config", "user.email", "t@t"); git(origin, "config", "user.name", "t")
+    (origin / "config.yaml").write_text("a: 1\nb: 2\n")
+    git(origin, "add", "."); git(origin, "commit", "-qm", "first")
+    git(tmp_path, "clone", "-q", str(origin), str(clone))
+    git(clone, "config", "user.email", "t@t"); git(clone, "config", "user.name", "t")
+    assert updater.check(clone).behind == 0
+    (origin / "new.py").write_text("x = 1\n")
+    git(origin, "add", "."); git(origin, "commit", "-qm", "Add new module")
+    (clone / "config.yaml").write_text("a: 1\nb: 3\n")          # a local edit to a tracked file
+    st = updater.check(clone)
+    assert st.ok and st.behind == 1 and st.incoming == ["Add new module"]
+    res = updater.update(clone, reinstall=False)
+    assert res.ok and res.updated and (clone / "new.py").exists()
+    assert (clone / "config.yaml").read_text() == "a: 1\nb: 3\n"  # kept
+    assert updater.update(clone, reinstall=False).updated is False
+
+
+def test_updater_outside_git(tmp_path):
+    from resell import updater
+    st = updater.check(tmp_path)
+    assert not st.ok and "git" in st.error
+
+
+def test_config_local_overrides(tmp_path):
+    import shutil
+
+    from resell.config import load_config
+    shutil.copy(Path(__file__).resolve().parent.parent / "config.yaml", tmp_path / "config.yaml")
+    (tmp_path / "data").mkdir()
+    (tmp_path / "data" / "config.local.yaml").write_text("costs:\n  shipping_eur_per_kg: 30\n", encoding="utf-8-sig")
+    cfg = load_config(tmp_path / "config.yaml")
+    assert cfg.costs["shipping_eur_per_kg"] == 30 and "rmb_per_eur_effective" in cfg.costs

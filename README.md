@@ -4,7 +4,25 @@ Local, boring tools for an electronics reselling side business: sourcing in Chin
 via Superbuy) and selling in Germany (Kleinanzeigen, eBay, Vinted). Everything runs on your machine.
 The only data store is a SQLite file. Your workbook is never written to.
 
-## Setup
+## Setup on Windows (one click)
+
+Double-click `windows/Install-ResellToolkit.bat`, or paste this into PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/dom1911k/flipping_scout/claude/gracious-dirac-39brnb/windows/install.ps1 | iex
+```
+
+It installs Git, Python 3.12 and ffmpeg (via winget), downloads the toolkit to `%USERPROFILE%\ResellToolkit`,
+installs its packages, asks for your keys (`.env`, opened in Notepad) and your sales sheet, adds two desktop
+shortcuts (**Resell Toolkit**, **Resell Toolkit Update**) and schedules the Sunday eBay scan. Running it
+again only adds what's missing.
+
+**Updating:** the **Update** tab in the web page, the **Resell Toolkit Update** shortcut, or `resell update`.
+It pulls the latest version of this branch from GitHub and reinstalls packages when they changed. `data/`,
+`.env` and `data/config.local.yaml` are never touched. Put your own settings (shipping rate, exchange rate,
+targets) in `data/config.local.yaml` with the same keys as `config.yaml`; they override it and survive updates.
+
+## Setup (manual, any OS)
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate

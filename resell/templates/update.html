@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Update{% endblock %}
+{% block content %}
+<h1>Update the toolkit</h1>
+<div class="sub">Gets the latest version from GitHub. Your sales sheet, database, keys and data/config.local.yaml are never touched.</div>
+<div class="card">
+{% if st %}
+  {% if not st.ok %}
+    <p><span class="verdict FAIL">Can't check</span> {{ st.error }}</p>
+  {% elif st.behind %}
+    <p><span class="verdict PASS">{{ st.behind }} update{{ "s" if st.behind != 1 }} available</span></p>
+    <ul>{% for line in st.incoming %}<li>{{ line }}</li>{% endfor %}</ul>
+    <form method="post" action="/update" style="border:0;padding:0"><button style="width:auto;padding:8px 16px">Update now</button></form>
+  {% else %}
+    <p><span class="verdict PASS">Up to date</span> <span class="hint">version {{ st.current }} on {{ st.branch }}</span></p>
+  {% endif %}
+{% else %}
+  {% if not res.ok %}
+    <p><span class="verdict FAIL">Update failed</span> {{ res.error }}</p>
+  {% elif not res.updated %}
+    <p><span class="verdict PASS">Already up to date</span></p>
+  {% else %}
+    <p><span class="verdict PASS">Updated</span> {{ res.before }} &rarr; {{ res.after }}{% if res.reinstalled %} (packages reinstalled){% endif %}</p>
+    <ul>{% for line in res.changes %}<li>{{ line }}</li>{% endfor %}</ul>
+    {% if supervised %}
+      <p class="hint">Restarting with the new version&hellip; this page reloads in a few seconds.</p>
+      <meta http-equiv="refresh" content="8;url=/update">
+    {% else %}
+      <p>Close the toolkit window and open <b>Resell Toolkit</b> again to use the new version.</p>
+    {% endif %}
+  {% endif %}
+{% endif %}
+</div>
+{% endblock %}

@@ -4,7 +4,9 @@ Works without JavaScript too: the forms post normally and the server returns the
 """
 from __future__ import annotations
 
+import os
 import re
+import threading
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -16,6 +18,7 @@ from . import ebay as eb
 from . import inspection as insp
 from . import replies as rep
 from . import research as rs
+from . import updater
 from .config import load_config
 
 env = Environment(loader=PackageLoader("resell", "templates"), autoescape=select_autoescape(["html"]))
@@ -40,6 +43,9 @@ def _num(v: str | None) -> float | None:
 def _vat(v: str | None) -> bool | None:
     return {"on": True, "off": False}.get(v or "auto")
 
+
+
+ROOT = Path(__file__).resolve().parent.parent   # the git checkout, for updates
 
 def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
     app = FastAPI(title="resell-toolkit", docs_url=None, redoc_url=None)
@@ -180,6 +186,21 @@ def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
         return RedirectResponse("/sellers" + (f"?{form['back']}" if form.get("back") else ""), status_code=303)
 
     # ------------------------------------------------------------------ Phase 4: research
+
+    @app.get("/update", response_class=HTMLResponse)
+    def update_page():
+        st = updater.check(ROOT)
+        return HTMLResponse(env.get_template("update.html").render(active="/update", st=st, res=None))
+
+    @app.post("/update", response_class=HTMLResponse)
+    def update_run():
+        res = updater.update(ROOT)
+        supervised = os.environ.get("RESELL_SUPERVISED") == "1"
+        if res.ok and res.updated and supervised:
+            # start.bat restarts the server on this exit code, so the new code loads
+            threading.Timer(1.5, lambda: os._exit(updater.RESTART_EXIT_CODE)).start()
+        return HTMLResponse(env.get_template("update.html").render(active="/update", st=None, res=res,
+                                                                   supervised=supervised))
 
     @app.get("/research", response_class=HTMLResponse)
     def research_list():
