@@ -184,7 +184,7 @@ research:
   ebay:                        # Browse API (official). Credentials in .env: EBAY_CLIENT_ID / EBAY_CLIENT_SECRET
     marketplace: EBAY_DE
     country: DE                # the "de" scope filters on item location; "eu" runs without it
-    condition: USED
-    max_items: 600             # per candidate and scope (3 pages of 200); disappearance tracking needs all matches
+    condition_ids: [2000, 2010, 2020, 2030, 2500, 3000, 4000, 5000, 6000]   # used + refurbished; no new, no for-parts
+    max_items: 1000            # per candidate and scope (5 pages of 200); disappearance tracking needs all matches
     pause_seconds: 0.5
     cache_dir: data/ebay_cache

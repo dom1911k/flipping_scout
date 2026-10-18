@@ -21,7 +21,8 @@ def connect(path: Path) -> sqlite3.Connection:
 
 # columns added after a table was first created (CREATE TABLE IF NOT EXISTS won't add them)
 _LATER_COLUMNS = {"candidates": {"own_sales_match": "TEXT", "match_terms": "TEXT", "query_eu": "TEXT",
-                                 "exclude_terms": "TEXT", "variant_terms": "TEXT", "variant_question_zh": "TEXT"}}
+                                 "exclude_terms": "TEXT", "variant_terms": "TEXT", "variant_question_zh": "TEXT",
+                                 "ebay_category_ids": "TEXT"}}
 
 
 def _add_missing_columns(con: sqlite3.Connection) -> None:

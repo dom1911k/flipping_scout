@@ -17,6 +17,7 @@ candidates:
     keywords_eu: "New 3DS XL dual IPS"
     match_terms: "new\\s*3ds\\s*(ll|xl)|new3ds\\s*(ll|xl)|n3ds\\s*(ll|xl)|新大三"
     query_eu: "New 3DS XL"
+    ebay_category_ids: "139971"
     variant_terms: "ips"
     variant_question_zh: "你好，请问上下两个屏幕都是IPS屏吗？还是只有上屏是IPS？谢谢！"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
@@ -36,6 +37,7 @@ candidates:
     keywords_eu: "iPod Classic 512GB"
     match_terms: "ipod\\s*(classic|video|7|5)|ipc"
     query_eu: "iPod Classic"
+    ebay_category_ids: "73839"
     variant_terms: "\\d{3}\\s*g|\\d\\s*t\\b|1t|sd|ssd|固态|改装|扩容"
     variant_question_zh: "你好，请问现在装的是什么存储，容量多大？电池换过吗，多少毫安？谢谢！"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
@@ -51,8 +53,9 @@ candidates:
     weight_kg: 0.30
     keywords_zh: "psv1000 破解, psv1000 oled, psv 改机 sd2vita"
     keywords_eu: "PS Vita 1000 OLED, PCH-1000"
-    match_terms: "psv\\s*-?\\s*1\\d{3}|pch-?1\\d{3}|vita\\s*1000|ps\\s*vita\\s*oled"
-    query_eu: "PS Vita 1000"
+    match_terms: 'psv\s*-?\s*1\d{3}|pch-?1\d{3}|vita\s*-?\s*1\d{3}|vita.*oled'
+    query_eu: 'PS Vita'
+    ebay_category_ids: "139971"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
     findings:
       - criterion: 1
@@ -82,6 +85,7 @@ candidates:
     keywords_eu: "PSP 3000, PSP Go"
     match_terms: "psp\\s*-?\\s*(3\\d{3}|go|n1000)|pspgo"
     query_eu: "PSP 3000"
+    ebay_category_ids: "139971"
     variant_terms: "ips"
     variant_question_zh: "你好，请问屏幕是原装屏还是换过IPS屏？主板是几G的（比如09G）？电池还能用多久？谢谢！"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
@@ -112,6 +116,7 @@ candidates:
     keywords_eu: "iPod mini SD, iPod mini 128GB"
     match_terms: "ipod\\s*mini"
     query_eu: "iPod mini"
+    ebay_category_ids: "73839"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
     findings:
       - criterion: 3
@@ -138,6 +143,7 @@ candidates:
     keywords_eu: "GBA SP AGS-101, GBA SP IPS"
     match_terms: "gba\\s*sp|gbasp|ags-?101|ags-?001"
     query_eu: "Gameboy Advance SP"
+    ebay_category_ids: "139971"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
     findings:
       - criterion: 3
@@ -164,6 +170,7 @@ candidates:
     keywords_eu: "Sony MZ-RH1, MiniDisc Walkman"
     match_terms: "md随身听|minidisc|mini\\s*disc|\\bmz-?[a-z]{0,3}\\d"
     query_eu: "MiniDisc Walkman"
+    ebay_category_ids: "15056"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
     findings:
       - criterion: 3
@@ -186,8 +193,9 @@ candidates:
     weight_kg: 0.25
     keywords_zh: "psv2000 破解, psv2000"
     keywords_eu: "PS Vita Slim, PCH-2000"
-    match_terms: "psv\\s*-?\\s*2\\d{3}|pch-?2\\d{3}|vita\\s*(slim|2000)"
-    query_eu: "PS Vita Slim"
+    match_terms: 'psv\s*-?\s*2\d{3}|pch-?2\d{3}|vita\s*-?\s*2\d{3}|vita.*slim'
+    query_eu: 'PS Vita'
+    ebay_category_ids: "139971"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
     findings:
       - criterion: 4
@@ -204,6 +212,7 @@ candidates:
     keywords_eu: "Sony D-EJ855, Discman D-EJ855"
     match_terms: "d-?ej\\s*855|ej855"
     query_eu: "Sony D-EJ855"
+    ebay_category_ids: "15054"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
     findings:
       - criterion: 3
@@ -223,6 +232,7 @@ candidates:
     keywords_eu: "Sony Discman D-EJ, Sony D-NE"
     match_terms: "discman|cd随身听|d-?ej\\s*\\d{3}|d-?ne\\s*\\d{3}"
     query_eu: "Sony Discman"
+    ebay_category_ids: "15054"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät"
     findings: []
   - id: sony-rx0
@@ -236,6 +246,7 @@ candidates:
     keywords_eu: "Sony RX0 II, Sony RX0"
     match_terms: "rx0\\s*(ii|m2|2)?|dsc-?rx0"
     query_eu: "Sony RX0"
+    ebay_category_ids: "31388"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -ladegerät -käfig -cage"
     findings:
       - criterion: 4
@@ -252,6 +263,7 @@ candidates:
     keywords_eu: "Sony IER-Z1R, Sony MDR-EX1000"
     match_terms: "ier-?z1r|z1r|mdr-?ex\\s*1000|ex1000"
     query_eu: "Sony IER-Z1R"
+    ebay_category_ids: "112529"
     exclude_terms: "-defekt -ersatzteil -bastler -hülle -case -kabel -tips -aufsätze"
     findings:
       - criterion: 4
@@ -270,6 +282,7 @@ candidates:
     keywords_eu: "PS Vita Speicherkarte"
     match_terms: "psv.*(记忆卡|卡|\\d+g)|vita.*(card|speicherkarte)"
     query_eu: "PS Vita Speicherkarte 64GB"
+    ebay_category_ids: "117045"
     exclude_terms: "-defekt -sd2vita -adapter"
     findings: []
   - id: ugreen-bt
@@ -286,6 +299,7 @@ candidates:
     keywords_eu: "Ugreen Switch Bluetooth Adapter"
     match_terms: "ugreen|绿联.*蓝牙"
     query_eu: "Ugreen Bluetooth Adapter Switch"
+    ebay_category_ids: "171814"
     exclude_terms: "-defekt"
     findings:
       - criterion: 0

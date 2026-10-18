@@ -28,6 +28,7 @@
       <div class="row">
         <div class="field"><label>eBay query</label><input name="query_eu" value="{{ a.cand.query_eu or '' }}"></div>
         <div class="field"><label>eBay exclusions</label><input name="exclude_terms" value="{{ a.cand.exclude_terms or '' }}"></div>
+        <div class="field"><label>eBay category IDs</label><input name="ebay_category_ids" value="{{ a.cand.ebay_category_ids or '' }}" placeholder="139971"></div>
       </div>
       <div class="row">
         <div class="field"><label>Cost profile</label><input name="calc_category" placeholder="e.g. iPod (empty = new)" value="{{ a.cand.calc_category or '' }}"></div>

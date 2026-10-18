@@ -230,13 +230,15 @@ recording at about $0.40–0.60. The exact cost of each run is printed in its re
 #   EBAY_CLIENT_ID=...
 #   EBAY_CLIENT_SECRET=...
 resell ebay-scan                 # all non-dropped candidates, DE + EU-wide
-resell ebay-scan -c psp --de-only
+resell ebay-scan -k psp --de-only
 ```
 
 **What it does:**
-- Gets a client-credentials token, then searches `item_summary/search` with `EBAY_DE`, `conditions:{USED}`,
+- Gets a client-credentials token, then searches `item_summary/search` with `EBAY_DE`, fixed-price + auction, used/refurbished condition IDs,
   and `itemLocationCountry:DE` for the DE scope.
-- Fetches up to 600 items per candidate and scope. Exclusion terms are applied to titles locally.
+- Fetches up to 600 items per candidate and scope. Titles must match the candidate's match regex and contain
+  no exclusion term (keeps games, chargers and other models out). Prices come from fixed-price listings;
+  auctions only count towards the auction share.
 - Stores per run: active count, p25/median/p75, auction share, and every item ID.
 - **Probable sales** are items present last week, gone now, whose scheduled end hadn't passed. This is
   only computed when both runs saw every match, and it is an *estimate*, not sold data.

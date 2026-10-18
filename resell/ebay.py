@@ -12,6 +12,7 @@ Credentials: EBAY_CLIENT_ID / EBAY_CLIENT_SECRET from the environment or a .env 
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import os
 import re
@@ -100,25 +101,34 @@ def get_token(client: httpx.Client, cid: str, secret: str) -> str:
 
 # ----------------------------------------------------------------------------- search
 
+DEFAULT_CONDITION_IDS = (2000, 2010, 2020, 2030, 2500, 3000, 4000, 5000, 6000)
+
+
 def _exclusions(text: str | None) -> list[str]:
     return [t[1:].lower() for t in (text or "").split() if t.startswith("-") and len(t) > 1]
 
 
-def search_all(cfg: Config, client: httpx.Client, token: str, query: str, scope: str, cache_dir: Path) -> dict:
+def search_all(cfg: Config, client: httpx.Client, token: str, query: str, scope: str, cache_dir: Path,
+               category_ids: str | None = None) -> dict:
     """All pages up to the cap. Returns {"total": int, "items": [...]}. Responses are cached per day."""
     e = (cfg.research or {}).get("ebay", {})
     limit, cap = 200, int(e.get("max_items", 600))
-    filters = [f"conditions:{{{e.get('condition', 'USED')}}}"]
+    # eBay returns only fixed-price items unless buyingOptions is given. Condition IDs: used grades plus
+    # refurbished (2000-2500), without new (1000/1500) and for-parts (7000).
+    cond = "|".join(str(c) for c in e.get("condition_ids", DEFAULT_CONDITION_IDS))
+    filters = ["buyingOptions:{FIXED_PRICE|AUCTION}", f"conditionIds:{{{cond}}}"]
     if scope == "de":
         filters.append(f"itemLocationCountry:{e.get('country', 'DE')}")
     items, total, offset = [], 0, 0
     while offset < cap:
-        key = re.sub(r"[^a-z0-9]+", "_", f"{query}_{scope}_{offset}".lower())
+        key = re.sub(r"[^a-z0-9]+", "_", f"{query}_{scope}_{offset}".lower()) + "_" + hashlib.sha1(
+            ",".join(filters + [category_ids or ""]).encode()).hexdigest()[:8]   # a filter change in config.yaml must not hit old pages
         cached = cache_dir / f"{key}.json"
         if cached.exists():
             data = json.loads(cached.read_text(encoding="utf-8"))
         else:
-            r = client.get(SEARCH_URL, params={"q": query, "filter": ",".join(filters), "limit": limit, "offset": offset},
+            r = client.get(SEARCH_URL, params={"q": query, "filter": ",".join(filters), "limit": limit, "offset": offset,
+                                                    **({"category_ids": category_ids} if category_ids else {})},
                            headers={"Authorization": f"Bearer {token}",
                                     "X-EBAY-C-MARKETPLACE-ID": e.get("marketplace", "EBAY_DE"),
                                     "Accept-Language": "de-DE"})
@@ -176,10 +186,13 @@ class Snapshot:
 
 def summarise(cand: dict, scope: str, query: str, raw: dict) -> Snapshot:
     excl = _exclusions(cand.get("exclude_terms"))
+    # The same regex that matches Xianyu titles keeps games, chargers and other models out of the stats.
+    pat = cand.get("match_terms")
+    rx = re.compile(pat, re.I) if isinstance(pat, str) and pat.strip() else None
     kept = []
     for it in raw["items"]:
         title = (it.get("title") or "").lower()
-        if any(x in title for x in excl):
+        if any(x in title for x in excl) or (rx and not rx.search(title)):
             continue
         price, cur = _price(it)
         if price is None or (cur and cur != "EUR"):
@@ -187,8 +200,9 @@ def summarise(cand: dict, scope: str, query: str, raw: dict) -> Snapshot:
         kept.append({"item_id": it.get("itemId"), "title": it.get("title"), "price": price, "currency": cur or "EUR",
                      "buying": ",".join(it.get("buyingOptions") or []), "end_date": it.get("itemEndDate"),
                      "country": (it.get("itemLocation") or {}).get("country"), "url": it.get("itemWebUrl")})
-    prices = sorted(k["price"] for k in kept)
+    # Price stats from fixed-price listings only: a running auction's current bid isn't a price.
     auctions = sum("AUCTION" in k["buying"] for k in kept)
+    prices = sorted(k["price"] for k in kept if "FIXED_PRICE" in k["buying"])
     return Snapshot(cand["id"], scope, query, raw["total"], len(raw["items"]), len(kept), _pct(prices, 0.25),
                     statistics.median(prices) if prices else None, _pct(prices, 0.75),
                     round(auctions / len(kept), 3) if kept else None,
@@ -235,7 +249,8 @@ def scan(cfg: Config, candidate_ids: list[str] | None = None, scopes=("de", "eu"
         for c in rows:
             query = (c.get("query_eu") or c.get("keywords_eu").split(",")[0]).strip()
             for scope in scopes:
-                raw = search_all(cfg, client, token, query, scope, cache_dir)
+                cats = re.sub(r"\s+", "", c.get("ebay_category_ids") or "") or None   # devices only: no parts, manuals, cases
+                raw = search_all(cfg, client, token, query, scope, cache_dir, cats)
                 snap = summarise(c, scope, query, raw)
                 prev = con.execute("SELECT id, complete FROM ebay_snapshots WHERE candidate = ? AND scope = ? "
                                    "AND run_date < ? ORDER BY run_date DESC LIMIT 1",

@@ -423,7 +423,7 @@ def record(
     video: Path = typer.Argument(..., help="Screen recording (.mp4/.mov)"),
     kind: str = typer.Option("xianyu_grid", "--kind", "-k", help="xianyu_grid | ebay_sold | kleinanzeigen"),
     label: str = typer.Option(None, "--label", "-l", help="e.g. the seller or search term"),
-    candidate: str = typer.Option(None, "--candidate", "-c", help="ebay_sold/kleinanzeigen: assign all rows to this candidate"),
+    candidate: str = typer.Option(None, "--candidate", "-k", help="ebay_sold/kleinanzeigen: assign all rows to this candidate"),
     extraction: Path = typer.Option(None, "--from-json", help="Use an existing extraction JSON instead of Claude vision"),
     config: Path = ConfigOpt,
 ):
@@ -443,7 +443,7 @@ def record(
 # ----------------------------------------------------------------------------- Phase 4b: eBay Browse API
 
 @app.command("ebay-scan")
-def ebay_scan(candidate: list[str] = typer.Option(None, "--candidate", "-c", help="Only these candidate ids"),
+def ebay_scan(candidate: list[str] = typer.Option(None, "--candidate", "-k", help="Only these candidate ids"),
               de_only: bool = typer.Option(False, "--de-only", help="Skip the EU-wide context run"),
               config: Path = ConfigOpt):
     """Weekly eBay snapshot per candidate (official Browse API): listings, prices, probable sales."""

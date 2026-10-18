@@ -157,7 +157,8 @@ def _client(pages_by_week):
             assert req.headers["Authorization"].startswith("Basic ")
             return httpx.Response(200, json={"access_token": "T", "expires_in": 7200})
         assert req.headers["X-EBAY-C-MARKETPLACE-ID"] == "EBAY_DE" and req.headers["Authorization"] == "Bearer T"
-        assert "conditions:{USED}" in req.url.params["filter"]
+        f = req.url.params["filter"]
+        assert "buyingOptions:{FIXED_PRICE|AUCTION}" in f and "conditionIds:{" in f and "7000" not in f
         calls["n"] += 1
         items = pages_by_week["items"]
         return httpx.Response(200, json={"total": len(items), "itemSummaries": items})
@@ -167,10 +168,12 @@ def _client(pages_by_week):
 
 def test_browse_snapshot_and_probable_sales(cfg):
     week = {"items": [_item(1, 80), _item(2, 95), _item(3, 120, "AUCTION", "2026-10-20T10:00:00Z"),
-                      _item(4, 999, title="PSP 3000 defekt Ersatzteil"), _item(5, 110)]}
+                      _item(4, 999, title="PSP 3000 defekt Ersatzteil"), _item(5, 110),
+                      _item(7, 15, title="Netzteil für Sony PSP 1000/2000/3000")]}
     client, calls = _client(week)
     s1 = EB.scan(cfg, ["psp"], ("de",), client=client, run_day=date(2026, 10, 10))[0]
-    assert s1.kept == 4 and s1.median == pytest.approx(102.5) and s1.auction_share == 0.25   # 'defekt' excluded
+    # 'defekt' excluded, the charger fails the match regex, the auction's bid is not a price
+    assert s1.kept == 4 and s1.median == 95 and s1.auction_share == 0.25
     assert s1.probable_sales is None                                                         # first run
     # a week later: #2 vanished early (probable sale), #3 auction ended on schedule (not a sale), #6 is new
     week["items"] = [_item(1, 80), _item(5, 105), _item(6, 90)]

@@ -221,7 +221,7 @@ def create_app(config_path: str | Path = "config.yaml") -> FastAPI:
         form = dict(await request.form())
         fields = {k: (form.get(k) or "").strip() or None for k in
                   ("status", "discontinued", "china_edge", "testability", "keywords_zh", "keywords_eu",
-                   "calc_category", "own_sales_match", "match_terms", "query_eu", "exclude_terms", "notes")}
+                   "calc_category", "own_sales_match", "match_terms", "query_eu", "exclude_terms", "ebay_category_ids", "notes")}
         fields["status"] = fields["status"] or "new"
         fields["weight_kg"] = _num(form.get("weight_kg"))
         fields["hype"] = int(bool(form.get("hype")))

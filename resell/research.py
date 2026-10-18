@@ -54,7 +54,8 @@ def migrate(cfg: Config) -> None:
         for old, new in OLD_STATUS.items():
             con.execute("UPDATE candidates SET status = ? WHERE status = ?", (new, old))
         for c in data["candidates"]:
-            for col in ("match_terms", "query_eu", "exclude_terms", "variant_terms", "variant_question_zh"):
+            for col in ("match_terms", "query_eu", "exclude_terms", "variant_terms", "variant_question_zh",
+                        "ebay_category_ids"):
                 if c.get(col):
                     con.execute(f"UPDATE candidates SET {col} = ? WHERE id = ? AND ({col} IS NULL OR {col} = '')",
                                 (c[col], c["id"]))
@@ -106,7 +107,7 @@ def add_candidate(cfg: Config, name: str, **fields) -> str:
 
 
 def update_candidate(cfg: Config, cid: str, **fields) -> None:
-    allowed = {"name", "calc_category", "own_sales_match", "match_terms", "query_eu", "exclude_terms",
+    allowed = {"name", "calc_category", "own_sales_match", "match_terms", "query_eu", "exclude_terms", "ebay_category_ids",
                "variant_terms", "variant_question_zh", "status", "discontinued", "china_edge", "testability", "hype",
                "new_devices", "weight_kg", "keywords_zh", "keywords_eu", "notes"}
     bad = set(fields) - allowed
